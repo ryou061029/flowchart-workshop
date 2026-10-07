@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>フローチャート工房</title>
+<meta name="description" content="カードを方眼に並べてプログラムの流れを組み立てるパズル。IF・LOOP・PRINT などのカードで作った流れが、お題どおりに動くかをテストで確かめます。ブラウザだけで遊べます。">
+<meta property="og:title" content="フローチャート工房">
+<meta property="og:description" content="カードを方眼に並べてプログラムの流れを組み立てるパズル。IF・LOOP・PRINT などのカードで作った流れが、お題どおりに動くかをテストで確かめます。ブラウザだけで遊べます。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ryou061029.github.io/flowchart-workshop/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Dela+Gothic+One&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* フローチャート工房 v1.0。方眼の盤面が主役。左に手札、右に盤面、盤面の下にテストケース。
+   カードの形・色・添え字は仕様 generated/docs/flowchart-kobo.md §3.2(見本: flowchart-kobo-card-design.html) */
+:root {
+  --paper: #f5f3ee; --sheet: #ffffff; --ink: #1d1f22; --ink-soft: #5b6067; --rule: #e1ddd3;
+  --grid: rgba(29, 31, 34, .07); --marker: #f2c230; --star: #a16207;
+  --ok: #1d7a4c; --ok-bg: #dcf0e4; --ng: #b3261e; --ng-bg: #f8dedb; --focus: #2f6fd6; --scrim: rgba(12, 14, 18, .45); --stamp: #c2410c;
+
+  --k-term: #25282c; --k-term-ink: #ffffff;
+  --k-br: #6a3d9a; --k-br-ink: #ffffff; --k-br-tint: #f2ebf9; --k-br-tint-ink: #4b2a72;
+  --k-loop: #c2410c; --k-loop-ink: #ffffff;
+  --k-pr: #1f3a8a; --k-pr-ink: #ffffff; --k-pr-tint: #e9eefb; --k-pr-tint-ink: #1f3a8a;
+  --k-var: #2e7d4f; --k-var-tint: #e6f3ea; --k-var-ink: #1f5a37;
+  --k-num: #8b5a2b; --k-num-tint: #f6ede3; --k-num-ink: #6a4320;
+  --k-sym: #5a6b7d; --k-sym-tint: #eef1f4; --k-sym-ink: #2f3b47;
+
+  --font-display: 'Dela Gothic One', 'Hiragino Kaku Gothic StdN', 'Yu Gothic', sans-serif;
+  --font-body: 'BIZ UDPGothic', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'BIZ UDGothic', ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141619; --sheet: #1c1f23; --ink: #e8e6e1; --ink-soft: #a3a7ad; --rule: #2d3137;
+    --grid: rgba(232, 230, 225, .07); --marker: #f0c34a; --star: #f0c34a;
+    --ok: #58c98c; --ok-bg: #173526; --ng: #ff8a80; --ng-bg: #3d1d1b; --focus: #7fb0ff; --scrim: rgba(0, 0, 0, .6); --stamp: #f08a5d;
+    --k-term: #e4e1da; --k-term-ink: #141619;
+    --k-br: #8458c0; --k-br-tint: #2a2139; --k-br-tint-ink: #dccbf3;
+    --k-pr: #4766cc; --k-pr-tint: #1c2442; --k-pr-tint-ink: #c9d6ff;
+    --k-var: #5fb07f; --k-var-tint: #17271d; --k-var-ink: #bfe5cc;
+    --k-num: #c08a55; --k-num-tint: #2a2017; --k-num-ink: #f0d6bb;
+    --k-sym: #8797a8; --k-sym-tint: #1f252c; --k-sym-ink: #d5dde5;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #141619; --sheet: #1c1f23; --ink: #e8e6e1; --ink-soft: #a3a7ad; --rule: #2d3137;
+  --grid: rgba(232, 230, 225, .07); --marker: #f0c34a; --star: #f0c34a;
+  --ok: #58c98c; --ok-bg: #173526; --ng: #ff8a80; --ng-bg: #3d1d1b; --focus: #7fb0ff; --scrim: rgba(0, 0, 0, .6); --stamp: #f08a5d;
+  --k-term: #e4e1da; --k-term-ink: #141619;
+  --k-br: #8458c0; --k-br-tint: #2a2139; --k-br-tint-ink: #dccbf3;
+  --k-pr: #4766cc; --k-pr-tint: #1c2442; --k-pr-tint-ink: #c9d6ff;
+  --k-var: #5fb07f; --k-var-tint: #17271d; --k-var-ink: #bfe5cc;
+  --k-num: #c08a55; --k-num-tint: #2a2017; --k-num-ink: #f0d6bb;
+  --k-sym: #8797a8; --k-sym-tint: #1f252c; --k-sym-ink: #d5dde5;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.65; }
+button, input { font: inherit; color: inherit; }
+button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-soft); }
+[tabindex="-1"]:focus { outline: none; }
+
+.app { max-width: 1320px; margin-inline: auto; padding-inline: 20px; padding-block: 18px 56px; }
+
+/* ヘッダー */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; padding-block-end: 12px; border-bottom: 2px solid var(--ink); }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.stencil { flex: none; width: 54px; height: 38px; color: var(--ink); }
+.brand h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1.2; letter-spacing: .03em; }
+.brand p { margin: 2px 0 0; color: var(--ink-soft); font-size: 13px; }
+.hud { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13px; }
+.hud-mode { font-weight: 700; }
+.timer { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 600; padding: 1px 10px; border: 1.5px solid var(--ink); border-radius: 4px; background: var(--sheet); }
+.timer.is-over { color: var(--ink-soft); border-color: var(--rule); }
+
+/* 共通部品 */
+.btn { padding: 7px 14px; border: 1.5px solid var(--ink); border-radius: 4px; background: var(--sheet); cursor: pointer; font-weight: 700; font-size: 14px; }
+.btn:hover { background: var(--paper); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn-run { background: var(--ink); color: var(--sheet); }
+.btn-run:hover { background: var(--ink); opacity: .9; }
+.btn-quiet { border-color: var(--rule); }
+.btn-small { padding: 3px 10px; font-size: 12.5px; }
+.panel { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; min-width: 0; }
+.panel h3 { margin: 0; font-size: 14px; letter-spacing: .06em; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 10px; margin-bottom: 10px; }
+.count-note { font-size: 12px; color: var(--ink-soft); }
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: .06em; color: var(--ink-soft); font-weight: 700; }
+h2.title { margin: 2px 0 6px; font-family: var(--font-display); font-weight: 400; font-size: 24px; line-height: 1.35; text-wrap: balance; }
+.goal { margin: 0; max-width: 70ch; display: flex; gap: 10px; align-items: baseline; }
+.goal-tag { flex: none; padding: 1px 8px; border: 1.5px solid var(--ink); border-radius: 3px; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 6px 8px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+thead th { font-size: 11.5px; letter-spacing: .06em; color: var(--ink-soft); }
+td.num, th.num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.pill--ok { background: var(--ok-bg); color: var(--ok); }
+.pill--ng { background: var(--ng-bg); color: var(--ng); }
+.pill--idle { color: var(--ink-soft); border: 1px solid var(--rule); }
+.stars { color: var(--star); letter-spacing: 2px; font-size: 16px; white-space: nowrap; }
+
+/* カード: 外側(.card)は位置と状態の枠、内側(.face)が形と色 */
+.card { position: absolute; height: 50px; border-radius: 7px; user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab; }
+.card .face { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 0 4px; border-radius: inherit; text-align: center; line-height: 1.1; overflow: hidden; }
+.card .m { font-weight: 700; font-size: 14px; letter-spacing: .02em; white-space: nowrap; }
+.card .s { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+.k-term { border-radius: 999px; }
+.k-term .face { background: var(--k-term); color: var(--k-term-ink); }
+.k-if .face { background: var(--k-br); color: var(--k-br-ink); border-radius: 0; clip-path: polygon(11px 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 11px 100%, 0 50%); }
+.k-yn .face { background: var(--k-br-tint); color: var(--k-br-tint-ink); border: 2px solid var(--k-br); }
+.k-loop .face { background: var(--k-loop); color: var(--k-loop-ink); border-radius: 0; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px); }
+.k-loopend .face { background: var(--k-loop); color: var(--k-loop-ink); border-radius: 0; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px)); }
+.k-print .face { background: var(--k-pr); color: var(--k-pr-ink); border-radius: 0; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.k-print .m, .k-word .m, .k-loopend .m.is-long { font-size: 13px; }
+.k-word .face { background: var(--k-pr-tint); color: var(--k-pr-tint-ink); border: 2px solid var(--k-pr); border-radius: 4px; }
+.k-var .face { background: var(--k-var-tint); color: var(--k-var-ink); border: 2px solid var(--k-var); border-radius: 6px; }
+.k-var .m { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 19px; }
+.k-num .face, .k-input .face { background: var(--k-num-tint); color: var(--k-num-ink); border: 2px solid var(--k-num); border-radius: 6px; }
+.k-num .m, .k-input .m { font-family: var(--font-mono); font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.k-input .m { font-size: 13px; }
+.k-sym .face { background: var(--k-sym-tint); color: var(--k-sym-ink); border: 2px solid var(--k-sym); border-radius: 6px; }
+.k-sym .m { font-size: 19px; letter-spacing: 0; }
+.k-sym .m.is-long { font-size: 16px; }
+.card.is-err { outline: 3px solid var(--ng); outline-offset: 2px; }
+.card.is-ran { outline: 3px solid var(--marker); outline-offset: 2px; }
+.card.is-dim { opacity: .35; }
+.card.is-picked { outline: 3px dashed var(--focus); outline-offset: 2px; }
+.card.is-dragging { opacity: .3; }
+
+/* スタート画面 */
+.home { display: grid; gap: 18px; margin-top: 20px; }
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 22px; align-items: start; }
+.intro h2 { margin: 0 0 10px; font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 1.4; text-wrap: balance; }
+.rules { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; max-width: 66ch; }
+.intro-fig { margin: 0; }
+figcaption { font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; font-weight: 700; }
+.read-rules { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: 14px; max-width: 80ch; }
+.legend { display: grid; gap: 10px; margin-top: 10px; }
+.legend-row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 14px; align-items: center; }
+.legend-name { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.swatch { flex: none; width: 12px; height: 12px; border-radius: 3px; }
+.legend-cards, .chips { display: flex; flex-wrap: wrap; gap: 10px 8px; }
+.legend-cards .card { position: relative; cursor: default; }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px; align-items: start; }
+.practice-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.task-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.task-row { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto; grid-template-areas: "lv no title stars btn" ". . best best btn"; align-items: center; gap: 2px 10px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; }
+.lv { grid-area: lv; padding: 0 7px; border: 1px solid var(--rule); border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.t-no { grid-area: no; font-family: var(--font-mono); font-weight: 600; color: var(--ink-soft); }
+.t-title { grid-area: title; font-weight: 700; min-width: 0; }
+.task-row .stars { grid-area: stars; }
+.t-best { grid-area: best; font-size: 12px; color: var(--ink-soft); }
+.task-row .btn { grid-area: btn; }
+.set-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.set-item { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; display: grid; gap: 4px; }
+.set-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; }
+.set-name { font-weight: 700; }
+.set-route, .set-twist { margin: 0; font-size: 13px; }
+.set-twist { color: var(--ink-soft); }
+.set-item .btn { justify-self: start; margin-top: 4px; }
+
+/* 課題画面 */
+.play { display: grid; grid-template-columns: 300px minmax(0, 1fr); grid-template-areas: "brief brief" "tray board" "tray judge"; gap: 16px 22px; margin-top: 18px; align-items: start; }
+.brief { grid-area: brief; min-width: 0; }
+.tray-col { grid-area: tray; min-width: 0; display: grid; gap: 14px; }
+.board-col { grid-area: board; min-width: 0; }
+.judge-col { grid-area: judge; min-width: 0; }
+.brief-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.hint { margin: 10px 0 0; max-width: 70ch; padding: 8px 12px; border-left: 3px solid var(--marker); background: var(--sheet); font-size: 14px; }
+.example-box { margin-top: 10px; }
+.example-box summary { cursor: pointer; color: var(--ink-soft); font-weight: 700; width: fit-content; }
+
+.tray-group + .tray-group { margin-top: 12px; }
+.tray-group h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; font-size: 11.5px; letter-spacing: .06em; color: var(--ink-soft); }
+.chip { position: relative; display: inline-block; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; border-radius: 8px; }
+.chip .card { position: relative; display: block; }
+.chip:disabled { opacity: .3; cursor: default; }
+.chip.is-selected .card { outline: 3px solid var(--focus); outline-offset: 2px; }
+.chip .count { position: absolute; right: -5px; top: -7px; z-index: 1; padding: 0 5px; border-radius: 999px; background: var(--ink); color: var(--sheet); font-family: var(--font-mono); font-size: 10.5px; line-height: 16px; }
+.ex-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.ex-tab { padding: 4px 10px; border: 1.5px solid var(--rule); border-radius: 999px; background: var(--sheet); font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.ex-tab:hover { border-color: var(--ink); }
+.ex-tab[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--sheet); }
+.ex-note { margin: 0 0 8px; font-size: 13.5px; max-width: 70ch; }
+.ex-count { display: inline-block; margin-right: 8px; padding: 0 7px; border: 1px solid var(--rule); border-radius: 4px; font-size: 12px; }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-height: 34px; margin-bottom: 6px; }
+.sel-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
+.board-msg { margin: 0; font-size: 13px; }
+.board-msg[data-tone="warn"] { color: var(--ng); font-weight: 700; }
+.board-msg[data-tone="ok"] { color: var(--ok); font-weight: 700; }
+.board-scroll { overflow: auto; max-height: 78vh; border: 1px solid var(--rule); border-radius: 4px; background: var(--sheet); }
+.board-scroll:focus-within { outline: 2px solid var(--focus); outline-offset: 1px; }
+.board, .mini-inner {
+  position: relative;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 34px 60px;
+}
+.board { outline: none; }
+.cursor { position: absolute; display: none; border: 2px solid var(--focus); border-radius: 5px; pointer-events: none; }
+.board:focus-visible .cursor { display: block; }
+.drop { position: absolute; height: 50px; border: 2px dashed var(--ink); border-radius: 7px; pointer-events: none; }
+.drop.is-bad { border-color: var(--ng); background: var(--ng-bg); }
+.board-help { margin: 6px 0 0; font-size: 12px; color: var(--ink-soft); }
+.ghost { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; }
+.ghost .card { position: relative; box-shadow: 0 10px 22px rgba(0, 0, 0, .28); }
+
+.errors { margin: 0 0 10px; padding: 10px 12px 10px 28px; border: 1.5px solid var(--ng); border-radius: 6px; background: var(--ng-bg); color: var(--ng); font-size: 13.5px; display: grid; gap: 4px; }
+.case-table td { font-family: var(--font-mono); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.case-table td:last-child { font-family: var(--font-body); white-space: nowrap; }
+.case-table tr.is-on > * { background: var(--ok-bg); }
+.case-btn { width: 26px; height: 26px; padding: 0; border: 1.5px solid var(--ink); border-radius: 50%; background: var(--sheet); font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
+.case-btn:disabled { opacity: .5; cursor: default; }
+.trial { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; }
+.trial input { width: 8em; padding: 5px 8px; border: 1.5px solid var(--ink); border-radius: 4px; background: var(--sheet); }
+.trial-out { margin: 8px 0 0; font-size: 13.5px; overflow-wrap: anywhere; }
+
+/* クリア・チャレンジ結果 */
+.clear, .result { margin-top: 22px; display: grid; gap: 18px; }
+.clear-head { display: flex; align-items: center; gap: 20px; }
+.stamp {
+  flex: none; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; text-align: center;
+  border: 3px solid var(--stamp); color: var(--stamp); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 5px var(--stamp);
+  font-family: var(--font-display); font-size: 20px; line-height: 1.1; transform: rotate(-14deg);
+  animation: stamp .45s cubic-bezier(.2, .9, .3, 1.2);
+}
+.stamp.is-ng { border-color: var(--ink-soft); color: var(--ink-soft); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 5px var(--ink-soft); font-size: 16px; }
+@keyframes stamp { from { transform: rotate(-14deg) scale(1.7); opacity: .2; } to { transform: rotate(-14deg) scale(1); opacity: 1; } }
+.star-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.star-list li { display: flex; align-items: baseline; gap: 10px; }
+.star-list .stars { font-size: 18px; }
+.best-line { margin: 10px 0 0; font-size: 13px; color: var(--ink-soft); }
+.clear-boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.clear-boards figure { margin: 0; min-width: 0; }
+.mini-wrap { overflow-x: auto; padding: 10px; border: 1px solid var(--rule); border-radius: 4px; background: var(--sheet); }
+.mini { position: relative; overflow: hidden; }
+.mini-inner { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.mini .card { cursor: default; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* 確認ダイアログ */
+.modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 16px; background: var(--scrim); }
+.modal-box { width: 100%; max-width: 440px; padding: 20px; border: 1.5px solid var(--ink); border-radius: 8px; background: var(--sheet); }
+.modal-box p { margin: 0 0 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 960px) {
+  .play { grid-template-columns: minmax(0, 1fr); grid-template-areas: "brief" "tray" "board" "judge"; }
+  .tray-panel { max-height: 320px; overflow-y: auto; }
+  .intro { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .app { padding-inline: 16px; }
+  .brand h1 { font-size: 22px; }
+  .stencil { display: none; }
+  .clear-head { flex-direction: column; align-items: flex-start; }
+  .legend-row { grid-template-columns: minmax(0, 1fr); }
+  .task-row { grid-template-columns: auto auto minmax(0, 1fr); grid-template-areas: "lv no title" "stars stars best" "btn btn btn"; gap: 4px 10px; }
+  .task-row .btn { justify-self: start; margin-top: 4px; }
+}
+/* 画面の下の表記 */
+.site-foot { margin-top: 48px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 12.5px; color: var(--ink-soft); }
+.site-foot p { margin: 0 0 4px; }
+.site-foot a { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .stamp { animation: none; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="stencil" viewBox="0 0 58 40" aria-hidden="true">
+        <rect x="1" y="12" width="17" height="16" rx="8" fill="none" stroke="currentColor" stroke-width="2"/>
+        <rect x="21" y="12" width="15" height="16" fill="none" stroke="currentColor" stroke-width="2"/>
+        <polygon points="48,6 57,20 48,34 39,20" fill="none" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <div>
+        <h1>フローチャート工房</h1>
+        <p>カードを並べてプログラムの流れを組み立てるパズル</p>
+      </div>
+    </div>
+    <div id="hud" class="hud" hidden>
+      <span id="hud-mode" class="hud-mode"></span>
+      <span id="hud-timer" class="timer" role="timer" aria-label="経過時間"></span>
+      <span id="hud-par" class="mono muted"></span>
+    </div>
+  </header>
+
+  <!-- スタート -->
+  <main id="s-home" class="home" hidden>
+    <h2 id="home-title" class="sr-only" tabindex="-1">スタート</h2>
+    <div class="intro">
+      <div>
+        <h2>カードを並べて、お題どおりに動く流れを組み立てる</h2>
+        <ul class="rules">
+          <li>手札のカードを盤面に並べてプログラムを作り、「判定する」で確かめます。全部のテストケースに合格すればクリアです。判定は何度でもできます。</li>
+          <li>練習でカードの置き方を覚えたら、フリーで 10 問を好きな順に解きましょう。チャレンジでは、限られた手札で 3 問を続けて解きます。</li>
+          <li>★ は 3 つ。クリア、基準の枚数以内、ヒントを見ずに基準の時間以内。時間切れはないので、じっくり考えても大丈夫です。</li>
+        </ul>
+      </div>
+      <figure class="intro-fig">
+        <figcaption>並べ方の例(練習 2: 合格かな)</figcaption>
+        <div id="intro-example" class="mini-wrap"></div>
+      </figure>
+    </div>
+
+    <section class="panel" aria-labelledby="rules-h">
+      <h3 id="rules-h">盤面の読み方</h3>
+      <ul class="read-rules" style="margin-top:8px">
+        <li>上から下へ読みます。1 行に 1 つの命令を、カードをすき間なく横に並べて作ります(例: <code>a = INPUT % 10</code>)。</li>
+        <li>Start の下の行から読み始めます。1 行空けると、そこで道が途切れます。</li>
+        <li>IF の行のすぐ下に Yes と No を置くと、左右に道が分かれます。分かれた道は合流しません。Yes / No の右に続けて命令を置いてもかまいません。</li>
+        <li>End は一番下に 1 枚あれば、すべての道の終わりになります。</li>
+        <li>CONTINUE で LOOP の直後へ戻り、BREAK でくり返しを抜けてそのカードの下へ進みます。</li>
+        <li>計算は × ÷ % が先で、同じ強さなら左から順に計算します。÷ は小数点以下を切り捨てます。= は右の値を左の変数に入れ、== は等しいかを調べます。</li>
+      </ul>
+      <details style="margin-top:10px">
+        <summary><strong>カードの仲間</strong>(色は一緒に使う仲間ごと)</summary>
+        <div id="legend" class="legend"></div>
+      </details>
+    </section>
+
+    <div class="modes">
+      <section class="panel" aria-labelledby="practice-h">
+        <div class="panel-head"><h3 id="practice-h">練習</h3><span class="count-note">★ はつきません。正解例も見られます</span></div>
+        <div id="practice-list" class="practice-list"></div>
+      </section>
+      <section class="panel" aria-labelledby="challenge-h">
+        <div class="panel-head"><h3 id="challenge-h">チャレンジ</h3><span class="count-note">限られた手札で 3 問を続けて解く</span></div>
+        <ul id="set-list" class="set-list"></ul>
+      </section>
+    </div>
+    <section class="panel" aria-labelledby="free-h">
+      <div class="panel-head"><h3 id="free-h">フリー(10 問)</h3><span id="free-total" class="count-note"></span></div>
+      <ul id="task-list" class="task-list"></ul>
+    </section>
+  </main>
+
+  <!-- 課題 -->
+  <main id="s-play" class="play" hidden>
+    <section class="brief" aria-labelledby="play-title">
+      <p class="eyebrow" id="play-eyebrow"></p>
+      <h2 class="title" id="play-title" tabindex="-1"></h2>
+      <p class="goal"><span class="goal-tag">お題</span><span id="play-goal"></span></p>
+      <div class="brief-actions">
+        <button type="button" id="judge-btn" class="btn btn-run">判定する</button>
+        <button type="button" id="hint-btn" class="btn">ヒントを見る</button>
+        <button type="button" id="clear-btn" class="btn">盤面を片付ける</button>
+        <button type="button" id="giveup-btn" class="btn btn-quiet">あきらめる</button>
+        <button type="button" id="leave-btn" class="btn btn-quiet">一覧へ戻る</button>
+      </div>
+      <p id="hint-text" class="hint" hidden></p>
+      <details id="practice-example" class="example-box" hidden>
+        <summary>正解例と別解を見る</summary>
+        <div id="practice-examples" class="examples"></div>
+      </details>
+    </section>
+
+    <div class="tray-col">
+      <section class="panel tray-panel" aria-labelledby="tray-h">
+        <div class="panel-head"><h3 id="tray-h">手札</h3><span id="hand-count" class="count-note"></span></div>
+        <div id="tray"></div>
+      </section>
+    </div>
+
+    <section class="board-col" aria-label="盤面">
+      <div class="toolbar">
+        <div id="sel-bar" class="sel-bar" hidden></div>
+        <p id="board-msg" class="board-msg"></p>
+      </div>
+      <div id="board-scroll" class="board-scroll">
+        <div id="board" class="board" tabindex="0" role="application" aria-label="盤面" aria-describedby="board-help"></div>
+      </div>
+      <p id="board-help" class="board-help">手札から盤面へドラッグして置きます。手札のカードを選んでから空いているマスを押しても置けます。盤面のカードはドラッグで動かし、盤面の外へ出すと手札に戻ります。キーボード: 盤面で矢印キーで移動、Enter で置く・持ち上げる・下ろす、Delete で手札に戻す、Esc で取り消し、T で手札へ。</p>
+    </section>
+
+    <section class="judge-col panel" aria-labelledby="cases-h">
+      <div class="panel-head"><h3 id="cases-h">テストケース</h3><span id="case-count" class="count-note"></span></div>
+      <ul id="errors" class="errors" hidden></ul>
+      <div class="table-wrap">
+        <table class="case-table">
+          <thead><tr><th scope="col">#</th><th scope="col">INPUT</th><th scope="col">期待する出力</th><th scope="col">実際の出力</th><th scope="col">判定</th></tr></thead>
+          <tbody id="cases"></tbody>
+        </table>
+      </div>
+      <form id="trial" class="trial">
+        <label for="trial-input">INPUT</label>
+        <input id="trial-input" type="number" step="1">
+        <button type="submit" class="btn btn-small">この値で動かす</button>
+      </form>
+      <p id="trial-out" class="trial-out" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <!-- クリア -->
+  <main id="s-clear" class="clear" hidden>
+    <div class="clear-head">
+      <div id="cl-stamp" class="stamp" aria-hidden="true"></div>
+      <div>
+        <p class="eyebrow" id="cl-eyebrow"></p>
+        <h2 class="title" id="cl-title" tabindex="-1"></h2>
+        <p id="cl-note" class="muted" style="margin:0"></p>
+      </div>
+    </div>
+    <section id="cl-stars-panel" class="panel" aria-labelledby="cl-stars-h">
+      <h3 id="cl-stars-h" class="sr-only">★ の判定</h3>
+      <ul id="cl-stars" class="star-list"></ul>
+      <p id="cl-best" class="best-line"></p>
+    </section>
+    <div class="clear-boards">
+      <figure><figcaption id="cl-mine-cap">あなたの並べ方</figcaption><div id="cl-mine" class="mini-wrap"></div></figure>
+      <figure><figcaption>正解例と別解(正解は 1 つではありません)</figcaption><div id="cl-examples" class="examples"></div></figure>
+    </div>
+    <div id="cl-actions" class="actions"></div>
+  </main>
+
+  <!-- チャレンジ結果 -->
+  <main id="s-result" class="result" hidden>
+    <div class="clear-head">
+      <div id="rs-stamp" class="stamp" aria-hidden="true"></div>
+      <div>
+        <p class="eyebrow" id="rs-eyebrow">チャレンジ結果</p>
+        <h2 class="title" id="rs-title" tabindex="-1"></h2>
+        <p id="rs-note" class="muted" style="margin:0"></p>
+      </div>
+    </div>
+    <section class="panel" aria-labelledby="rs-stars-h">
+      <h3 id="rs-stars-h" class="sr-only">★ の判定</h3>
+      <ul id="rs-stars" class="star-list"></ul>
+      <p id="rs-best" class="best-line"></p>
+    </section>
+    <div class="table-wrap panel">
+      <table>
+        <thead><tr><th scope="col">課題</th><th scope="col">結果</th><th scope="col" class="num">カード</th><th scope="col" class="num">時間</th><th scope="col">ヒント</th></tr></thead>
+        <tbody id="rs-rows"></tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button type="button" id="rs-again" class="btn btn-run">もう一度</button>
+      <button type="button" id="rs-home" class="btn">一覧へ戻る</button>
+    </div>
+  </main>
+
+  <footer class="site-foot">
+    <p>遊んだ記録は、このブラウザの中にだけ保存します。どこにも送信しません。文字の表示のために Google Fonts からフォントを読み込みます。</p>
+    <p>不具合や感想は <a href="https://github.com/ryou061029/flowchart-workshop/issues">GitHub の Issues</a> へお寄せください。<a href="https://github.com/ryou061029/flowchart-workshop">ソースコード</a> · © 2026 ryou061029 · MIT License</p>
+  </footer>
+</div>
+
+<div id="ask" class="modal" role="dialog" aria-modal="true" aria-labelledby="ask-msg" hidden>
+  <div class="modal-box">
+    <p id="ask-msg"></p>
+    <div class="modal-actions">
+      <button type="button" id="ask-cancel" class="btn">やめる</button>
+      <button type="button" id="ask-ok" class="btn btn-run">OK</button>
+    </div>
+  </div>
+</div>
+<div id="live" class="sr-only" aria-live="polite"></div>
+
+<script src="engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  const E = window.FlowEngine;
+  const CW = 34, RH = 60, CH = 50, TOP = (RH - CH) / 2;
+  const COLS = E.BOARD.cols, ROWS = E.BOARD.rows;
+  const SAVE_KEY = 'flowchart-kobo:v3';
+  const OLD_KEYS = ['flowchart-kobo:v2']; // 前の版の保存データ(読まずに消す)
+  const GROUP_COLOR = { terminal: '--k-term', branch: '--k-br', loop: '--k-loop', print: '--k-pr', var: '--k-var', num: '--k-num', sym: '--k-sym' };
+
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const byId = E.taskById;
+  const setById = (id) => E.SETS.find((s) => s.id === id);
+  const W = (id) => E.card(id).width;
+  const cardName = (id) => { const d = E.card(id); return d.sub ? `${d.label}(${d.sub})` : d.label; };
+  const total = (o) => Object.values(o).reduce((a, b) => a + b, 0);
+  const pad = (n) => String(n).padStart(2, '0');
+  const clock = (sec) => `${Math.floor(sec / 60)}:${pad(Math.floor(sec % 60))}`;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const fmtLines = (a) => (a.length ? a.map(esc).join('<br>') : '(何も出力しない)');
+  const starText = (s) => '★'.repeat(E.starCount(s)) + '☆'.repeat(3 - E.starCount(s));
+  const starHtml = (s) => `<span class="stars" role="img" aria-label="★ ${E.starCount(s)} / 3">${starText(s)}</span>`;
+  const one = (on) => `<span class="stars" aria-hidden="true">${on ? '★' : '☆'}</span>`;
+
+  const fresh = () => ({ v: 3, screen: 'home', play: null, ch: null, last: null, chResult: null, best: {}, chBest: {}, seq: 0 });
+  let S = fresh();
+  const T = { sel: null, cursor: { row: 1, col: 4 }, judge: null, trial: null, highlight: null, drag: null, suppressClick: false, onCase: null };
+  const resetT = () => { T.sel = null; T.judge = null; T.trial = null; T.highlight = null; T.onCase = null; };
+
+  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (err) { /* 保存できない環境では記録が残らないだけ */ } }
+  function load() {
+    try { OLD_KEYS.forEach((k) => localStorage.removeItem(k)); } catch (err) { /* 消せなくても遊べる */ }
+    try {
+      const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+      if (s && s.v === 3) return s;
+    } catch (err) { /* 壊れた保存データは無視する */ }
+    return null;
+  }
+
+  function live(msg) { const el = $('#live'); el.textContent = ''; requestAnimationFrame(() => { el.textContent = msg; }); }
+  function say(msg, tone) { const el = $('#board-msg'); el.textContent = msg; el.dataset.tone = tone || ''; live(msg); }
+
+  // ---- 確認ダイアログ(サンドボックスでは confirm() が使えないため、ページ内で確認する) ----
+  let askResolve = null;
+  function askConfirm(message, okLabel) {
+    const back = document.activeElement;
+    $('#ask-msg').textContent = message;
+    $('#ask-ok').textContent = okLabel || 'OK';
+    $('#ask').hidden = false;
+    $('#ask-ok').focus();
+    return new Promise((resolve) => {
+      askResolve = (v) => {
+        askResolve = null;
+        $('#ask').hidden = true;
+        if (back && back.isConnected) back.focus();
+        resolve(v);
+      };
+    });
+  }
+  const askAnswer = (v) => { if (askResolve) askResolve(v); };
+  $('#ask-ok').addEventListener('click', () => askAnswer(true));
+  $('#ask-cancel').addEventListener('click', () => askAnswer(false));
+  $('#ask').addEventListener('click', (e) => { if (e.target.id === 'ask') askAnswer(false); });
+  document.addEventListener('keydown', (e) => {
+    if (!askResolve) return;
+    if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); askAnswer(false); }
+  }, true);
+
+  // ---- 遊んでいる課題 ----
+  // フリー・練習は課題ごとの共通カード + 数字とことばを枚数の制限なく使う。チャレンジはセットの手札を減らしながら使う
+  function ctx() {
+    const p = S.play;
+    const task = byId(p.taskId);
+    const hand = p.kind === 'challenge' ? S.ch.hand : null;
+    return { kind: p.kind, task, board: p.board, hand };
+  }
+  function trayList() {
+    const c = ctx();
+    if (!c.hand) return E.trayCards(c.task);
+    const set = setById(S.ch.setId);
+    const seen = new Set();
+    const list = [];
+    for (const tid of set.tasks) for (const id of E.trayCards(byId(tid))) if (!seen.has(id) && id in set.hand) { seen.add(id); list.push(id); }
+    return list;
+  }
+  const elapsed = () => (S.play ? (Date.now() - S.play.startedAt) / 1000 : 0);
+
+  function fits(board, id, row, col, ignoreId) {
+    const w = W(id);
+    if (row < 0 || row >= ROWS || col < 0 || col + w > COLS) return false;
+    return !board.some((c) => c.id !== ignoreId && c.row === row && c.col < col + w && col < c.col + W(c.card));
+  }
+  const cardAt = (board, row, col) => board.find((c) => c.row === row && col >= c.col && col < c.col + W(c.card));
+
+  function boardChanged() { T.judge = null; T.trial = null; T.highlight = null; T.onCase = null; save(); renderPlay(); }
+
+  function placeCard(id, row, col) {
+    const c = ctx();
+    if (!trayList().includes(id)) { say(`この課題では「${cardName(id)}」は使えません。`, 'warn'); return false; }
+    if (c.hand && !(c.hand[id] > 0)) { say(`「${cardName(id)}」は手札に残っていません。`, 'warn'); return false; }
+    if (!fits(c.board, id, row, col)) { say('そこには置けません。ほかのカードと重なるか、盤面からはみ出します。', 'warn'); return false; }
+    c.board.push({ id: `k${++S.seq}`, card: id, row, col });
+    if (c.hand) c.hand[id] -= 1;
+    T.sel = null;
+    T.cursor = { row, col };
+    boardChanged();
+    say(`「${cardName(id)}」を ${row + 1} 行目に置きました。`);
+    return true;
+  }
+  function moveCard(id, row, col) {
+    const c = ctx();
+    const k = c.board.find((x) => x.id === id);
+    if (!k) return false;
+    if (!fits(c.board, k.card, row, col, id)) { say('そこには動かせません。ほかのカードと重なるか、盤面からはみ出します。', 'warn'); return false; }
+    k.row = row; k.col = col;
+    if (T.sel && T.sel.id === id) T.sel = null;
+    boardChanged();
+    say(`「${cardName(k.card)}」を ${row + 1} 行目に動かしました。`);
+    return true;
+  }
+  function removeCard(id) {
+    const c = ctx();
+    const i = c.board.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    const [k] = c.board.splice(i, 1);
+    if (c.hand) c.hand[k.card] += 1;
+    if (T.sel && T.sel.id === id) T.sel = null;
+    boardChanged();
+    say(`「${cardName(k.card)}」を手札に戻しました。`);
+  }
+
+  // ---- 進行 ----
+  function openPlay(kind, taskId) {
+    S.play = { kind, taskId, board: [], startedAt: Date.now(), hintUsed: false, hintOpen: false };
+    S.screen = 'play';
+    resetT();
+    T.cursor = { row: 1, col: 4 };
+    say('');
+    $('#trial-input').value = '';
+    save(); render();
+    window.scrollTo(0, 0);
+    $('#play-title').focus();
+  }
+  function startChallenge(setId) {
+    const set = setById(setId);
+    S.ch = { setId, index: 0, hand: Object.assign({}, set.hand), results: [] };
+    openPlay('challenge', set.tasks[0]);
+  }
+  function goHome() {
+    S.play = null; S.screen = 'home';
+    resetT(); save(); render();
+    window.scrollTo(0, 0);
+    $('#home-title').focus();
+  }
+  function finishTask(cleared) {
+    const p = S.play;
+    if (!p) return;
+    askAnswer(false);
+    const task = byId(p.taskId);
+    const sec = Math.floor(elapsed());
+    const board = p.board.map((k) => Object.assign({}, k));
+    const last = { kind: p.kind, taskId: task.id, cleared, cards: board.length, sec, hintUsed: p.hintUsed, board };
+    if (p.kind === 'free') {
+      last.stars = E.freeStars(task, { cleared, cards: board.length, sec, hintUsed: p.hintUsed });
+      S.best[task.id] = E.mergeBest(S.best[task.id] || null, last.stars, board.length, sec);
+    }
+    if (p.kind === 'challenge') {
+      if (!cleared) for (const k of p.board) S.ch.hand[k.card] += 1; // あきらめた課題のカードは手札に戻る
+      S.ch.results.push({ taskId: task.id, cleared, sec, hintUsed: p.hintUsed, cards: board.length });
+    }
+    S.last = last; S.play = null;
+    resetT();
+    if (p.kind === 'challenge' && S.ch.results.length === setById(S.ch.setId).tasks.length) { finishChallenge(); return; }
+    S.screen = 'clear';
+    save(); render();
+    window.scrollTo(0, 0);
+    $('#cl-title').focus();
+  }
+  function finishChallenge() {
+    const set = setById(S.ch.setId);
+    const left = total(S.ch.hand);
+    const stars = E.challengeStars(set, S.ch.results, left);
+    const sec = S.ch.results.reduce((n, r) => n + r.sec, 0);
+    const prev = S.chBest[set.id] || { clear: false, few: false, fast: false, maxLeft: null, minSec: null };
+    if (stars.clear) {
+      S.chBest[set.id] = {
+        clear: true, few: prev.few || stars.few, fast: prev.fast || stars.fast,
+        maxLeft: prev.maxLeft === null ? left : Math.max(prev.maxLeft, left), minSec: prev.minSec === null ? sec : Math.min(prev.minSec, sec),
+      };
+    } else S.chBest[set.id] = prev;
+    S.chResult = { setId: set.id, results: S.ch.results, left, stars, sec };
+    S.ch = null; S.screen = 'result';
+    save(); render();
+    window.scrollTo(0, 0);
+    $('#rs-title').focus();
+  }
+  function nextChallengeTask() {
+    const set = setById(S.ch.setId);
+    S.ch.index += 1;
+    openPlay('challenge', set.tasks[S.ch.index]);
+  }
+
+  // ---- 描画: カード ----
+  function cardHtml(id, o) {
+    o = o || {};
+    const d = E.card(id);
+    const pos = o.x !== undefined ? `left:${o.x + 2}px;top:${o.y}px;` : '';
+    const cls = ['card', `k-${d.kind}`].concat(o.cls || []).filter(Boolean).join(' ');
+    const attrs = o.id ? ` data-id="${o.id}" data-drag="board"` : '';
+    const long = (d.kind === 'sym' && d.label.length > 1) || d.label.length >= 8 ? ' is-long' : '';
+    const sub = d.sub ? `<span class="s" aria-hidden="true">${esc(d.sub)}</span>` : '';
+    return `<div class="${cls}"${attrs} style="${pos}width:${d.width * CW - 4}px"><span class="face"><span class="m${long}">${esc(d.label)}</span>${sub}</span></div>`;
+  }
+  function miniBoard(cards, scale) {
+    scale = scale || 0.62;
+    if (!cards.length) return '<p class="muted">(盤面にカードはありませんでした)</p>';
+    const w = Math.max(...cards.map((k) => k.col + W(k.card))) * CW + 6;
+    const h = (Math.max(...cards.map((k) => k.row)) + 1) * RH;
+    return `<div class="mini" style="width:${Math.ceil(w * scale)}px;height:${Math.ceil(h * scale)}px"><div class="mini-inner" style="width:${w}px;height:${h}px;transform:scale(${scale})">`
+      + cards.map((k) => cardHtml(k.card, { x: k.col * CW, y: k.row * RH + TOP })).join('') + '</div></div>';
+  }
+  // 正解例と別解の切り替え。同じ課題のあいだは選んだ並べ方を保つ
+  function renderExamples(el, task) {
+    if (el.dataset.task !== task.id) { el.dataset.task = task.id; el.dataset.ex = '0'; }
+    const i = Math.min(Number(el.dataset.ex) || 0, task.examples.length - 1);
+    const ex = task.examples[i];
+    const cards = E.fromText(ex.rows);
+    el.innerHTML = `<div class="ex-tabs" role="group" aria-label="正解例と別解の切り替え">`
+      + task.examples.map((x, j) => `<button type="button" class="ex-tab" data-ex="${j}" aria-pressed="${j === i}">${esc(x.title)}</button>`).join('')
+      + `</div><p class="ex-note"><span class="ex-count mono">${cards.length} 枚</span>${esc(ex.note)}</p><div class="mini-wrap">${miniBoard(cards)}</div>`;
+  }
+  const groupsOf = (ids) => E.GROUPS.map((g) => ({ g, ids: ids.filter((id) => E.card(id).group === g.id) })).filter((x) => x.ids.length);
+  const swatch = (gid) => `<span class="swatch" style="background:var(${GROUP_COLOR[gid]})" aria-hidden="true"></span>`;
+
+  // ---- 描画: 画面 ----
+  function render() {
+    if (S.screen === 'play' && !S.play) S.screen = 'home';
+    if (S.screen === 'clear' && (!S.last || (S.last.kind === 'challenge' && !S.ch))) S.screen = 'home';
+    if (S.play && S.play.kind === 'challenge' && !S.ch) { S.play = null; S.screen = 'home'; }
+    if (S.screen === 'result' && !S.chResult) S.screen = 'home';
+    $('#s-home').hidden = S.screen !== 'home';
+    $('#s-play').hidden = S.screen !== 'play';
+    $('#s-clear').hidden = S.screen !== 'clear';
+    $('#s-result').hidden = S.screen !== 'result';
+    renderHud();
+    if (S.screen === 'home') renderHome();
+    else if (S.screen === 'play') renderPlay();
+    else if (S.screen === 'clear') renderClear();
+    else renderResult();
+  }
+
+  function modeLabel(kind, task) {
+    if (kind === 'practice') return `練習 ${task.no}`;
+    if (kind === 'free') return `フリー · 課題 ${task.no} · ${task.level}`;
+    const set = setById(S.ch.setId);
+    return `チャレンジ ${set.id} · ${S.ch.index + 1} / ${set.tasks.length} 問`;
+  }
+  function renderHud() {
+    const on = S.screen === 'play';
+    $('#hud').hidden = !on;
+    if (!on) return;
+    const c = ctx();
+    $('#hud-mode').textContent = modeLabel(c.kind, c.task) + (c.hand ? ` · 手札 ${total(c.hand)} 枚` : '');
+    $('#hud-par').textContent = c.task.parSec ? `基準 ${clock(c.task.parSec)}` : '';
+    tick();
+  }
+
+  function renderHome() {
+    $('#intro-example').innerHTML = miniBoard(E.fromText(byId('p2').examples[0].rows), 0.56);
+    const legend = { terminal: ['start', 'end'], branch: ['if', 'yes', 'no'], loop: ['loop', 'continue', 'break'], print: ['print', 'word:円'],
+      var: ['var:a', 'var:b', 'var:c'], num: ['input', 'num:1', 'num:60', 'num:100'], sym: ['set', 'eq', 'lt', 'gt', 'add', 'sub', 'mul', 'div', 'mod'] };
+    $('#legend').innerHTML = E.GROUPS.map((g) => `<div class="legend-row"><span class="legend-name">${swatch(g.id)}${esc(g.name)}</span>`
+      + `<span class="legend-cards" role="list">${legend[g.id].map((id) => `<span role="listitem" aria-label="${esc(cardName(id))}">${cardHtml(id)}</span>`).join('')}</span></div>`).join('');
+    $('#practice-list').innerHTML = E.PRACTICE.map((t) => `<button type="button" class="btn" data-practice="${t.id}">練習 ${t.no}: ${esc(t.title)}</button>`).join('');
+    let got = 0;
+    $('#task-list').innerHTML = E.TASKS.map((t) => {
+      const b = S.best[t.id] || { clear: false, few: false, fast: false, minCards: null, minSec: null };
+      got += E.starCount(b);
+      const best = b.clear ? `最少 ${b.minCards} 枚 · 最短 ${clock(b.minSec)}(基準 ${t.par} 枚 · ${clock(t.parSec)})` : `基準 ${t.par} 枚 · ${clock(t.parSec)}`;
+      return `<li class="task-row"><span class="lv">${esc(t.level)}</span><span class="t-no">${t.no}</span><span class="t-title">${esc(t.title)}</span>${starHtml(b)}`
+        + `<button type="button" class="btn btn-small" data-free="${t.id}" aria-label="課題 ${t.no} ${esc(t.title)} に挑戦する">挑戦する</button><span class="t-best">${best}</span></li>`;
+    }).join('');
+    $('#free-total').textContent = `★ ${got} / ${E.TASKS.length * 3}`;
+    $('#set-list').innerHTML = E.SETS.map((s) => {
+      const b = S.chBest[s.id] || { clear: false, few: false, fast: false, maxLeft: null, minSec: null };
+      const route = s.tasks.map((id) => byId(id).title).join(' → ');
+      const best = b.clear ? `最多の残り ${b.maxLeft} 枚 · 最短 ${clock(b.minSec)}` : `基準: 残り ${s.parLeft} 枚以上 · 合計 ${clock(s.parSec)} 以内`;
+      return `<li class="set-item"><div class="set-head"><span class="set-name">セット ${s.id}: ${esc(s.title)}</span>${starHtml(b)}</div>`
+        + `<p class="set-route">${esc(route)}(手札 ${total(s.hand)} 枚)</p><p class="set-twist">仕掛け: ${esc(s.twist.text)}。${esc(best)}</p>`
+        + `<button type="button" class="btn btn-small" data-set="${s.id}">セット ${s.id} を始める</button></li>`;
+    }).join('');
+  }
+
+  function renderPlay() { renderBrief(); renderTray(); renderBoard(); renderSelBar(); renderJudge(); }
+
+  function renderBrief() {
+    const c = ctx(), t = c.task, p = S.play;
+    $('#play-eyebrow').textContent = modeLabel(c.kind, t) + (t.par ? ` · 基準 ${t.par} 枚 · ${clock(t.parSec)}` : '');
+    $('#play-title').textContent = t.title;
+    $('#play-goal').textContent = t.goal;
+    $('#giveup-btn').hidden = c.kind !== 'challenge';
+    $('#leave-btn').textContent = c.kind === 'challenge' ? 'チャレンジを中断する' : '一覧へ戻る';
+    $('#practice-example').hidden = c.kind !== 'practice';
+    if (c.kind === 'practice') renderExamples($('#practice-examples'), t);
+    $('#hint-text').textContent = t.hint;
+    $('#hint-text').hidden = !p.hintOpen;
+    $('#hint-btn').textContent = p.hintOpen ? 'ヒントを閉じる' : 'ヒントを見る';
+  }
+
+  function renderTray() {
+    const c = ctx();
+    const ids = trayList();
+    $('#tray').innerHTML = groupsOf(ids).map(({ g, ids: list }) => `<section class="tray-group"><h4>${swatch(g.id)}${esc(g.name)}</h4><div class="chips">`
+      + list.map((id) => {
+        const n = c.hand ? c.hand[id] || 0 : null;
+        const on = !!(T.sel && T.sel.card === id);
+        return `<button type="button" class="chip${on ? ' is-selected' : ''}" data-drag="tray" data-card="${esc(id)}" aria-pressed="${on}"${n === 0 ? ' disabled' : ''} aria-label="${esc(cardName(id))}(${esc(g.name)})${n === null ? '' : `残り ${n} 枚`}">`
+          + `${cardHtml(id)}${n === null ? '' : `<span class="count" aria-hidden="true">${n}</span>`}</button>`;
+      }).join('') + '</div></section>').join('');
+    $('#hand-count').textContent = c.hand ? `残り ${total(c.hand)} 枚` : '枚数の制限なし';
+  }
+
+  function errorIds() {
+    const list = (T.trial && T.trial.errors) || (T.judge && T.judge.errors) || [];
+    return new Set(list.flatMap((e) => e.cards));
+  }
+  function renderBoard() {
+    const c = ctx();
+    const el = $('#board');
+    el.style.width = `${COLS * CW}px`;
+    el.style.height = `${ROWS * RH}px`;
+    const errs = errorIds();
+    const hl = T.highlight ? new Set(T.highlight) : null;
+    el.innerHTML = c.board.map((k) => cardHtml(k.card, {
+      id: k.id, x: k.col * CW, y: k.row * RH + TOP,
+      cls: [errs.has(k.id) && 'is-err', hl && hl.has(k.id) && 'is-ran', hl && !hl.has(k.id) && 'is-dim', T.sel && T.sel.id === k.id && 'is-picked'],
+    })).join('') + '<div class="cursor" id="cursor"></div><div class="drop" id="drop" hidden></div>';
+    renderCursor();
+  }
+  function renderCursor() {
+    const cur = $('#cursor');
+    if (!cur) return;
+    const c = ctx();
+    const picked = T.sel && T.sel.id ? c.board.find((k) => k.id === T.sel.id) : null;
+    const w = T.sel && T.sel.card ? W(T.sel.card) : picked ? W(picked.card) : 1;
+    cur.style.cssText = `left:${T.cursor.col * CW}px;top:${T.cursor.row * RH + 2}px;width:${w * CW}px;height:${RH - 4}px`;
+  }
+  function renderSelBar() {
+    const bar = $('#sel-bar');
+    const c = ctx();
+    if (!T.sel) { bar.hidden = true; return; }
+    bar.hidden = false;
+    if (T.sel.card) {
+      bar.innerHTML = `<span>選択中: 手札の「${esc(cardName(T.sel.card))}」</span><button type="button" class="btn btn-small" data-selbar="cancel">選択をやめる</button>`;
+    } else {
+      const k = c.board.find((x) => x.id === T.sel.id);
+      bar.innerHTML = `<span>選択中: 盤面の「${esc(k ? cardName(k.card) : '')}」(動かす先のマスを押す)</span><button type="button" class="btn btn-small" data-selbar="remove">手札に戻す</button><button type="button" class="btn btn-small" data-selbar="cancel">選択をやめる</button>`;
+    }
+  }
+
+  function renderJudge() {
+    const t = ctx().task;
+    const j = T.judge;
+    const errs = (T.trial && T.trial.errors) || (j && j.errors) || [];
+    $('#errors').hidden = !errs.length;
+    $('#errors').innerHTML = errs.map((e) => `<li>${esc(e.msg)}${e.cards.length ? `(赤い枠のカード ${e.cards.length} 枚)` : ''}</li>`).join('');
+    $('#cases').innerHTML = t.cases.map((cs, i) => {
+      const r = j && j.results[i];
+      const verdict = !r || r.output === null ? '<span class="pill pill--idle">未判定</span>'
+        : r.pass ? '<span class="pill pill--ok">合格</span>' : '<span class="pill pill--ng">不合格</span>';
+      const actual = !r || r.output === null ? '—' : r.error ? `<span class="pill pill--ng">エラー</span> ${esc(r.error)}` : fmtLines(r.output);
+      const usable = r && r.output !== null;
+      return `<tr${T.onCase === i ? ' class="is-on"' : ''}><th scope="row"><button type="button" class="case-btn" data-case="${i}"${usable ? '' : ' disabled'} aria-label="テスト ${i + 1} で通ったカードを光らせる">${i + 1}</button></th>`
+        + `<td>${cs.input === null ? '(なし)' : esc(cs.input)}</td><td>${fmtLines(cs.expect)}</td><td>${actual}</td><td>${verdict}</td></tr>`;
+    }).join('');
+    $('#case-count').textContent = j && !j.errors.length ? `${j.results.filter((r) => r.pass).length} / ${t.cases.length} 合格` : `${t.cases.length} 件`;
+    const tr = T.trial;
+    $('#trial-out').innerHTML = !tr ? '' : tr.errors ? '読み取れないところがあります(上の一覧を確かめてください)。'
+      : tr.error ? `<span class="pill pill--ng">エラー</span> ${esc(tr.error)}` : `出力: ${fmtLines(tr.output)}`;
+  }
+
+  function renderClear() {
+    const L = S.last;
+    const t = byId(L.taskId);
+    const stamp = $('#cl-stamp');
+    stamp.textContent = L.cleared ? 'クリア' : '未クリア';
+    stamp.classList.toggle('is-ng', !L.cleared);
+    const set = L.kind === 'challenge' ? setById(S.ch.setId) : null;
+    $('#cl-eyebrow').textContent = L.kind === 'practice' ? `練習 ${t.no}` : L.kind === 'free' ? `フリー · 課題 ${t.no} · ${t.level}`
+      : `チャレンジ ${set.id} · ${S.ch.results.length} / ${set.tasks.length} 問`;
+    $('#cl-title').textContent = t.title;
+    const note = L.kind === 'practice' ? 'カードの置き方はつかめましたか? フリーで本編の 10 問に挑戦できます。'
+      : L.kind === 'free' ? `${L.cards} 枚のカードで、${clock(L.sec)} でクリアしました。`
+        : L.cleared ? `盤面の ${L.cards} 枚は手札から減りました。残りの手札は ${total(S.ch.hand)} 枚です。`
+          : `この課題はあきらめました。盤面のカードは手札に戻しました(残り ${total(S.ch.hand)} 枚)。`;
+    $('#cl-note').textContent = note;
+    const panel = $('#cl-stars-panel');
+    panel.hidden = L.kind !== 'free';
+    if (L.kind === 'free') {
+      const s = L.stars;
+      $('#cl-stars').innerHTML = [
+        [s.clear, 'クリア(全テストケースに合格)'],
+        [s.few, `カード ${t.par} 枚以内(今回 ${L.cards} 枚)`],
+        [s.fast, `ヒントを見ずに ${clock(t.parSec)} 以内(今回 ${clock(L.sec)}${L.hintUsed ? '・ヒントあり' : ''})`],
+      ].map(([on, text]) => `<li>${one(on)}<span>${esc(text)}<span class="sr-only">${on ? '(達成)' : '(未達成)'}</span></span></li>`).join('');
+      const b = S.best[t.id];
+      $('#cl-best').textContent = b && b.clear ? `これまでの記録: ★ ${E.starCount(b)} / 3 · 最少 ${b.minCards} 枚 · 最短 ${clock(b.minSec)}` : '';
+    }
+    $('#cl-mine-cap').textContent = `あなたの並べ方(${L.cards} 枚)`;
+    $('#cl-mine').innerHTML = miniBoard(L.board);
+    renderExamples($('#cl-examples'), t);
+    let acts = '';
+    if (L.kind === 'challenge') acts = '<button type="button" class="btn btn-run" data-act="next-ch">次の課題へ</button>';
+    else {
+      const list = L.kind === 'free' ? E.TASKS : E.PRACTICE;
+      const i = list.findIndex((x) => x.id === t.id);
+      const next = list[i + 1];
+      if (next) acts += `<button type="button" class="btn btn-run" data-act="next" data-task="${next.id}">次へ: ${esc(next.title)}</button>`;
+      else if (L.kind === 'practice') acts += `<button type="button" class="btn btn-run" data-act="next" data-task="${E.TASKS[0].id}">フリーへ: ${esc(E.TASKS[0].title)}</button>`;
+      acts += `<button type="button" class="btn" data-act="retry" data-task="${t.id}">もう一度</button><button type="button" class="btn" data-act="home">一覧へ戻る</button>`;
+    }
+    $('#cl-actions').innerHTML = acts;
+  }
+
+  function renderResult() {
+    const R = S.chResult;
+    const set = setById(R.setId);
+    const stamp = $('#rs-stamp');
+    stamp.textContent = R.stars.clear ? 'クリア' : '未クリア';
+    stamp.classList.toggle('is-ng', !R.stars.clear);
+    $('#rs-title').textContent = `セット ${set.id}: ${set.title}`;
+    $('#rs-note').textContent = `${R.results.filter((r) => r.cleared).length} / ${set.tasks.length} 問クリア · 残りの手札 ${R.left} 枚 · 合計 ${clock(R.sec)}`;
+    $('#rs-stars').innerHTML = [
+      [R.stars.clear, `${set.tasks.length} 問すべてクリア`],
+      [R.stars.few, `残りの手札 ${set.parLeft} 枚以上(今回 ${R.left} 枚)`],
+      [R.stars.fast, `ヒントを見ずに合計 ${clock(set.parSec)} 以内(今回 ${clock(R.sec)})`],
+    ].map(([on, text]) => `<li>${one(on)}<span>${esc(text)}<span class="sr-only">${on ? '(達成)' : '(未達成)'}</span></span></li>`).join('');
+    const b = S.chBest[set.id];
+    $('#rs-best').textContent = b && b.clear ? `これまでの記録: ★ ${E.starCount(b)} / 3 · 最多の残り ${b.maxLeft} 枚 · 最短 ${clock(b.minSec)}` : '';
+    $('#rs-rows').innerHTML = R.results.map((r) => {
+      const t = byId(r.taskId);
+      return `<tr><td>課題 ${t.no} ${esc(t.title)}</td><td>${r.cleared ? '<span class="pill pill--ok">クリア</span>' : '<span class="pill pill--ng">あきらめた</span>'}</td>`
+        + `<td class="num">${r.cards} 枚</td><td class="num">${clock(r.sec)}</td><td>${r.hintUsed ? '見た' : '—'}</td></tr>`;
+    }).join('');
+  }
+
+  // ---- 経過時間 ----
+  function tick() {
+    if (S.screen !== 'play' || !S.play) return;
+    const sec = elapsed();
+    const el = $('#hud-timer');
+    el.textContent = `経過 ${clock(sec)}`;
+    const t = byId(S.play.taskId);
+    el.classList.toggle('is-over', !!t.parSec && sec > t.parSec);
+  }
+  setInterval(tick, 250);
+
+  // ---- 操作: スタート画面 ----
+  $('#s-home').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-practice], [data-free], [data-set]');
+    if (!b) return;
+    if (b.dataset.practice) openPlay('practice', b.dataset.practice);
+    else if (b.dataset.free) openPlay('free', b.dataset.free);
+    else startChallenge(b.dataset.set);
+  });
+
+  // ---- 操作: 課題画面 ----
+  $('#judge-btn').addEventListener('click', () => {
+    const c = ctx();
+    T.trial = null; T.highlight = null; T.onCase = null;
+    T.judge = E.judge(c.task, c.board);
+    if (T.judge.allPass) { finishTask(true); return; }
+    renderPlay();
+    if (T.judge.errors.length) say(`読み取れないところが ${T.judge.errors.length} か所あります。赤い枠のカードを確かめてください。`, 'warn');
+    else say(`${T.judge.results.length} 件中 ${T.judge.results.filter((r) => r.pass).length} 件合格。表の番号を押すと、そのケースで通ったカードが光ります。`, 'warn');
+  });
+  $('#hint-btn').addEventListener('click', async () => {
+    const p = S.play;
+    if (!p) return;
+    if (p.hintOpen) { p.hintOpen = false; save(); renderBrief(); return; }
+    if (!p.hintUsed && p.kind !== 'practice') {
+      const ok = await askConfirm('ヒントを見ると、この回は「ヒントを見ずに基準時間以内」の ★ が付かなくなります。見ますか?', 'ヒントを見る');
+      if (!ok || S.play !== p) return;
+    }
+    p.hintUsed = true; p.hintOpen = true;
+    save(); renderBrief();
+  });
+  $('#clear-btn').addEventListener('click', () => {
+    const c = ctx();
+    if (!c.board.length) return;
+    if (c.hand) for (const k of c.board) c.hand[k.card] += 1;
+    c.board.length = 0;
+    T.sel = null;
+    boardChanged();
+    say('盤面のカードをすべて手札に戻しました。');
+  });
+  $('#giveup-btn').addEventListener('click', async () => {
+    const p = S.play;
+    if (!p || p.kind !== 'challenge') return;
+    if (await askConfirm('この課題をあきらめて次へ進みますか? 盤面のカードは手札に戻ります。', 'あきらめる') && S.play === p) finishTask(false);
+  });
+  $('#leave-btn').addEventListener('click', async () => {
+    const p = S.play;
+    if (!p) return;
+    if (p.kind === 'challenge') {
+      if (!await askConfirm('チャレンジを中断して一覧へ戻りますか? このセットは最初からやり直しになります。', '中断する') || S.play !== p) return;
+      S.ch = null;
+    } else if (p.board.length && (!await askConfirm('盤面のカードと経過時間を捨てて、一覧へ戻りますか?', '一覧へ戻る') || S.play !== p)) return;
+    goHome();
+  });
+
+  // ---- 操作: クリア・結果 ----
+  $('#cl-actions').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const a = b.dataset.act;
+    if (a === 'next-ch') nextChallengeTask();
+    else if (a === 'home') goHome();
+    else {
+      const id = b.dataset.task;
+      openPlay(byId(id).level === '練習' ? 'practice' : 'free', id);
+    }
+  });
+  $('#rs-again').addEventListener('click', () => startChallenge(S.chResult.setId));
+  $('#rs-home').addEventListener('click', goHome);
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.ex-tab');
+    if (!b) return;
+    const el = b.closest('.examples');
+    el.dataset.ex = b.dataset.ex;
+    renderExamples(el, byId(el.dataset.task));
+    el.querySelector(`.ex-tab[data-ex="${b.dataset.ex}"]`).focus();
+  });
+
+  $('#cases').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-case]');
+    if (!b || !T.judge) return;
+    const i = Number(b.dataset.case);
+    T.onCase = T.onCase === i ? null : i;
+    T.highlight = T.onCase === null ? null : T.judge.results[i].visited;
+    renderBoard(); renderJudge();
+  });
+  $('#trial').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const raw = $('#trial-input').value.trim();
+    const input = raw === '' ? null : Number(raw);
+    if (raw === '' || !Number.isInteger(input)) { $('#trial-out').textContent = '整数を入力してください(マイナスの数も入力できます)。'; return; }
+    const p = E.parse(ctx().board);
+    T.judge = null; T.onCase = null;
+    if (!p.ok) { T.trial = { errors: p.errors }; T.highlight = null; } else { const r = E.run(p.program, input); T.trial = r; T.highlight = r.visited; }
+    renderBoard(); renderJudge();
+  });
+
+  $('#tray').addEventListener('click', (e) => {
+    const b = e.target.closest('.chip');
+    if (!b || b.disabled) return;
+    const id = b.dataset.card;
+    T.sel = T.sel && T.sel.card === id ? null : { card: id };
+    renderTray(); renderBoard(); renderSelBar();
+    if (!T.sel) { say('選択を取り消しました。'); return; }
+    say(`「${cardName(id)}」を選びました。盤面の空いているマスを押すと置けます。`);
+    if (e.detail === 0) $('#board').focus(); // キーボードで選んだときは盤面へ移る
+    else { const again = $(`#tray .chip[data-card="${CSS.escape(id)}"]`); if (again) again.focus(); }
+  });
+  $('#sel-bar').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-selbar]');
+    if (!b) return;
+    if (b.dataset.selbar === 'remove' && T.sel && T.sel.id) { removeCard(T.sel.id); return; }
+    T.sel = null; renderTray(); renderBoard(); renderSelBar(); say('選択を取り消しました。');
+  });
+
+  function cellFromClient(x, y) {
+    const r = $('#board').getBoundingClientRect();
+    return { row: Math.floor((y - r.top) / RH), col: Math.floor((x - r.left) / CW) };
+  }
+  $('#board').addEventListener('click', (e) => {
+    const c = ctx();
+    const cardEl = e.target.closest('.card[data-id]');
+    if (cardEl) {
+      const id = cardEl.dataset.id;
+      T.sel = T.sel && T.sel.id === id ? null : { id };
+      const k = c.board.find((x) => x.id === id);
+      T.cursor = { row: k.row, col: k.col };
+      renderTray(); renderBoard(); renderSelBar();
+      say(T.sel ? `盤面の「${cardName(k.card)}」を選びました。動かす先の空いているマスを押すか、「手札に戻す」を押します。` : '選択を取り消しました。');
+      return;
+    }
+    const cell = cellFromClient(e.clientX, e.clientY);
+    T.cursor = cell;
+    if (T.sel && T.sel.card) placeCard(T.sel.card, cell.row, cell.col);
+    else if (T.sel && T.sel.id) moveCard(T.sel.id, cell.row, cell.col);
+    else renderCursor();
+  });
+  $('#board').addEventListener('keydown', (e) => {
+    const c = ctx();
+    let { row, col } = T.cursor;
+    const k = e.key;
+    if (k.startsWith('Arrow')) {
+      e.preventDefault();
+      row = clamp(row + (k === 'ArrowDown') - (k === 'ArrowUp'), 0, ROWS - 1);
+      col = clamp(col + (k === 'ArrowRight') - (k === 'ArrowLeft'), 0, COLS - 1);
+      T.cursor = { row, col };
+      renderCursor();
+      const under = cardAt(c.board, row, col);
+      live(`${row + 1} 行 ${col + 1} 列${under ? `、「${cardName(under.card)}」` : ''}`);
+      $('#cursor').scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      return;
+    }
+    if (k === 'Enter' || k === ' ') {
+      e.preventDefault();
+      if (T.sel && T.sel.card) placeCard(T.sel.card, row, col);
+      else if (T.sel && T.sel.id) moveCard(T.sel.id, row, col);
+      else {
+        const under = cardAt(c.board, row, col);
+        if (!under) { say('カードを置くには、先に手札からカードを選んでください(T で手札へ移動)。'); return; }
+        T.sel = { id: under.id }; T.cursor = { row: under.row, col: under.col };
+        renderBoard(); renderSelBar();
+        say(`「${cardName(under.card)}」を持ち上げました。矢印キーで動かし、Enter で下ろします。Delete で手札に戻します。`);
+      }
+      return;
+    }
+    if (k === 'Delete' || k === 'Backspace') {
+      e.preventDefault();
+      const target = (T.sel && T.sel.id) || (cardAt(c.board, row, col) || {}).id;
+      if (target) removeCard(target);
+      return;
+    }
+    if (k === 'Escape' && T.sel) { T.sel = null; renderTray(); renderBoard(); renderSelBar(); say('選択を取り消しました。'); return; }
+    if (k === 't' || k === 'T') {
+      e.preventDefault();
+      const chip = $('#tray .chip.is-selected') || $('#tray .chip:not([disabled])');
+      if (chip) chip.focus();
+    }
+  });
+
+  // ---- ドラッグ(マウス・タッチ共通) ----
+  function dropCell(e, d) {
+    const sc = $('#board-scroll').getBoundingClientRect();
+    if (e.clientX < sc.left || e.clientX > sc.right || e.clientY < sc.top || e.clientY > sc.bottom) return null;
+    const r = $('#board').getBoundingClientRect();
+    return { col: Math.round((e.clientX - d.offX - r.left - 2) / CW), row: Math.round((e.clientY - d.offY - r.top - TOP) / RH) };
+  }
+  function showDrop(cell, id, ignoreId) {
+    const el = $('#drop');
+    if (!el) return;
+    if (!cell) { el.hidden = true; return; }
+    el.hidden = false;
+    el.classList.toggle('is-bad', !fits(ctx().board, id, cell.row, cell.col, ignoreId));
+    el.style.cssText = `left:${cell.col * CW + 2}px;top:${cell.row * RH + TOP}px;width:${W(id) * CW - 4}px`;
+  }
+  document.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || S.screen !== 'play' || !S.play) return;
+    const src = e.target.closest('[data-drag]');
+    if (!src || src.disabled) return;
+    const fromBoard = src.dataset.drag === 'board';
+    const k = fromBoard ? ctx().board.find((x) => x.id === src.dataset.id) : null;
+    const id = fromBoard ? k.card : src.dataset.card;
+    const face = fromBoard ? src : src.querySelector('.card');
+    const r = face.getBoundingClientRect();
+    if (e.pointerType === 'mouse') e.preventDefault(); // ドラッグ中に文字が選択されないようにする
+    T.drag = { fromBoard, id: fromBoard ? k.id : null, card: id, x0: e.clientX, y0: e.clientY, offX: e.clientX - r.left, offY: e.clientY - r.top, moved: false, src, ghost: null };
+    try { src.setPointerCapture(e.pointerId); } catch (err) { /* 取れなくてもドラッグはできる */ }
+  });
+  document.addEventListener('pointermove', (e) => {
+    const d = T.drag;
+    if (!d) return;
+    if (!d.moved) {
+      if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 6) return;
+      d.moved = true;
+      d.ghost = document.createElement('div');
+      d.ghost.className = 'ghost';
+      d.ghost.innerHTML = cardHtml(d.card);
+      document.body.appendChild(d.ghost);
+      d.src.classList.add('is-dragging');
+    }
+    d.ghost.style.transform = `translate(${e.clientX - d.offX}px, ${e.clientY - d.offY}px)`;
+    showDrop(dropCell(e, d), d.card, d.id);
+  });
+  function endDrag(e, cancelled) {
+    const d = T.drag;
+    if (!d) return;
+    T.drag = null;
+    if (!d.moved) return;
+    T.suppressClick = true;
+    setTimeout(() => { T.suppressClick = false; }, 0);
+    d.ghost.remove();
+    d.src.classList.remove('is-dragging');
+    showDrop(null);
+    if (cancelled) return;
+    const cell = dropCell(e, d);
+    if (cell) { if (d.fromBoard) moveCard(d.id, cell.row, cell.col); else placeCard(d.card, cell.row, cell.col); } else if (d.fromBoard) removeCard(d.id);
+  }
+  document.addEventListener('pointerup', (e) => endDrag(e, false));
+  document.addEventListener('pointercancel', (e) => endDrag(e, true));
+  document.addEventListener('click', (e) => { if (T.suppressClick) { T.suppressClick = false; e.stopPropagation(); e.preventDefault(); } }, true);
+
+  // ---- 起動(このブラウザに保存した続きから) ----
+  const saved = load();
+  if (saved) S = Object.assign(fresh(), saved);
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# 作業用のフォルダとテストの実行記録は公開しない
+tmp/
+generated/reports/
+# 開発ツールの設定と作業用(公開しない)
+.claude/
+# OS・ツール
+.DS_Store
+Thumbs.db
+node_modules/

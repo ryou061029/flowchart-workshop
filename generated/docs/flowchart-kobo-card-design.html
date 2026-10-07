@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>カードのデザイン案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* フローチャート工房 v1.0 案: カードのデザイン見本(仕様 flowchart-kobo.md §3.2)。色の値は【暫定】 */
+:root {
+  --paper: #f5f3ee; --sheet: #ffffff; --ink: #1d1f22; --ink-soft: #5b6067; --rule: #e1ddd3; --grid: #ebe7de;
+  --sumi: #25282c; --sumi-ink: #ffffff;
+  --mura: #6a3d9a; --mura-ink: #ffffff; --mura-tint: #f2ebf9; --mura-tint-ink: #4b2a72;
+  --shu: #c2410c; --shu-ink: #ffffff;
+  --ai: #1f3a8a; --ai-ink: #ffffff; --ai-tint: #e9eefb; --ai-tint-ink: #1f3a8a;
+  --var: #2e7d4f; --var-tint: #e6f3ea; --var-ink: #1f5a37;
+  --num: #8b5a2b; --num-tint: #f6ede3; --num-ink: #6a4320;
+  --sym: #5a6b7d; --sym-tint: #eef1f4; --sym-ink: #2f3b47;
+  --font: "BIZ UDPGothic", "Yu Gothic UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --mono: "IBM Plex Mono", Consolas, "SFMono-Regular", monospace;
+  --cw: 34px; --rh: 60px; --ch: 50px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141619; --sheet: #1c1f23; --ink: #e8e6e1; --ink-soft: #a3a7ad; --rule: #2d3137; --grid: #24282d;
+    --sumi: #e4e1da; --sumi-ink: #141619;
+    --mura: #8458c0; --mura-ink: #ffffff; --mura-tint: #2a2139; --mura-tint-ink: #dccbf3;
+    --shu: #c2410c; --shu-ink: #ffffff;
+    --ai: #4766cc; --ai-ink: #ffffff; --ai-tint: #1c2442; --ai-tint-ink: #c9d6ff;
+    --var: #5fb07f; --var-tint: #17271d; --var-ink: #bfe5cc;
+    --num: #c08a55; --num-tint: #2a2017; --num-ink: #f0d6bb;
+    --sym: #8797a8; --sym-tint: #1f252c; --sym-ink: #d5dde5;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #141619; --sheet: #1c1f23; --ink: #e8e6e1; --ink-soft: #a3a7ad; --rule: #2d3137; --grid: #24282d;
+  --sumi: #e4e1da; --sumi-ink: #141619;
+  --mura: #8458c0; --mura-ink: #ffffff; --mura-tint: #2a2139; --mura-tint-ink: #dccbf3;
+  --shu: #c2410c; --shu-ink: #ffffff;
+  --ai: #4766cc; --ai-ink: #ffffff; --ai-tint: #1c2442; --ai-tint-ink: #c9d6ff;
+  --var: #5fb07f; --var-tint: #17271d; --var-ink: #bfe5cc;
+  --num: #c08a55; --num-tint: #2a2017; --num-ink: #f0d6bb;
+  --sym: #8797a8; --sym-tint: #1f252c; --sym-ink: #d5dde5;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.7; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 24px 16px 64px; }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); }
+h1 { margin: 0; font-size: 24px; line-height: 1.3; }
+header p { margin: 4px 0 0; color: var(--ink-soft); font-size: 13px; }
+.theme { display: flex; gap: 6px; }
+.theme button { font: inherit; font-size: 13px; padding: 4px 12px; border: 1.5px solid var(--ink); border-radius: 4px; background: var(--sheet); color: var(--ink); cursor: pointer; }
+.theme button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+h2 { margin: 36px 0 6px; font-size: 18px; }
+.lead { margin: 0 0 14px; color: var(--ink-soft); font-size: 13.5px; }
+
+/* 仲間ごとの一覧 */
+.groups { display: grid; gap: 12px; }
+.group { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 8px 20px; align-items: center; padding: 14px 16px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; }
+.group h3 { margin: 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.swatch { flex: none; width: 14px; height: 14px; border-radius: 3px; }
+.group p { grid-column: 1 / -1; margin: 0; color: var(--ink-soft); font-size: 12.5px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px 8px; align-items: center; }
+
+/* カード */
+.card { position: relative; flex: none; height: var(--ch); display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 0 4px; text-align: center; user-select: none; line-height: 1.1; }
+.card .m { font-weight: 700; font-size: 14px; letter-spacing: .02em; white-space: nowrap; }
+.card .s { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+.k-term { background: var(--sumi); color: var(--sumi-ink); border-radius: 999px; }
+.k-if { background: var(--mura); color: var(--mura-ink); clip-path: polygon(11px 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 11px 100%, 0 50%); }
+.k-yn { background: var(--mura-tint); color: var(--mura-tint-ink); border: 2px solid var(--mura); border-radius: 7px; }
+.k-loop { background: var(--shu); color: var(--shu-ink); clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%, 0 10px); }
+.k-loopend { background: var(--shu); color: var(--shu-ink); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px)); }
+.k-print { background: var(--ai); color: var(--ai-ink); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.k-print .m { font-size: 13px; }
+.k-word { background: var(--ai-tint); color: var(--ai-tint-ink); border: 2px solid var(--ai); border-radius: 4px; }
+.k-word .m { font-size: 13px; }
+.k-chip { border: 2px solid; border-radius: 6px; }
+.k-var { background: var(--var-tint); color: var(--var-ink); border-color: var(--var); }
+.k-num, .k-input { background: var(--num-tint); color: var(--num-ink); border-color: var(--num); }
+.k-op { background: var(--sym-tint); color: var(--sym-ink); border-color: var(--sym); }
+.k-var .m { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 19px; font-weight: 700; }
+.k-num .m { font-family: var(--mono); font-size: 15px; font-weight: 600; letter-spacing: 0; }
+.k-op .m { font-size: 19px; font-weight: 700; letter-spacing: 0; }
+.k-op2 .m { font-size: 16px; letter-spacing: 0; }
+.k-input .m { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 0; }
+.k-loopend .m[data-long] { font-size: 13px; }
+
+/* 盤面 */
+.boards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr)); gap: 16px; }
+.board-box { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.board-box h3 { margin: 0 0 2px; font-size: 14px; }
+.board-box p { margin: 0 0 10px; color: var(--ink-soft); font-size: 12.5px; }
+.board-scroll { overflow-x: auto; }
+.board { position: relative; background-color: var(--sheet); background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px), linear-gradient(to bottom, var(--grid) 1px, transparent 1px); background-size: var(--cw) var(--rh); border: 1px solid var(--grid); }
+.board .card { position: absolute; }
+
+/* 決まり */
+.rules { margin: 0; padding-left: 20px; font-size: 14px; }
+.rules li { margin: 4px 0; }
+.note { margin-top: 28px; padding: 12px 16px; border-left: 4px solid var(--mura); background: var(--sheet); font-size: 13px; color: var(--ink-soft); }
+
+@media (max-width: 640px) {
+  .group { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>カードのデザイン案</h1>
+      <p>フローチャート工房 v1.0 案。英語のラベルと日本語の添え字、仲間ごとの色。色の値と大きさは暫定</p>
+    </div>
+    <div class="theme" role="group" aria-label="表示テーマ">
+      <button type="button" data-theme-set="light">ライト</button>
+      <button type="button" data-theme-set="dark">ダーク</button>
+    </div>
+  </header>
+
+  <h2>仲間ごとのカード</h2>
+  <p class="lead">実際の大きさです。1 マスは幅 34px、カードの高さは 50px(添え字を入れるため、前の版の 44px から高くした)。数字は 2 けたまで 1 マス、3 けた以上は 2 マス。= と == は添え字を入れるため 2 マス。</p>
+  <div class="groups" id="groups"></div>
+
+  <h2>盤面に並べたとき</h2>
+  <p class="lead">正解例をそのまま盤面に置いた見え方です。どこが分岐で、どこがくり返しかを色で追えるかを確かめます。</p>
+  <div class="boards" id="boards"></div>
+
+  <h2>デザインの決まり</h2>
+  <ul class="rules">
+    <li>形は流れ図の記号に寄せる。Start / End は端子、IF は判断、PRINT は表示、LOOP はループの始まり、CONTINUE と BREAK はループの終わりの形。</li>
+    <li>色は一緒に使う仲間ごとに 1 色。条件分岐は紫、ループは朱、出力は藍、変数は緑、数値は茶、記号は灰青。Start / End は色を付けない墨色。</li>
+    <li>命令のカード(IF・LOOP・CONTINUE・BREAK・PRINT)は塗りつぶし。目印と部品(Yes・No・ことば・変数・数値・記号)は淡い地と枠にする。</li>
+    <li>日本語の添え字は英語のラベルの下に置く。取り違えやすい = (入れる)と == (等しい)にも意味を添える。ほかの記号・変数・数字・ことばには付けない。</li>
+    <li>色だけに頼らず、形とラベルでも仲間が分かるようにする。</li>
+  </ul>
+  <p class="note">見本のための静的なページです。カードは動かせません。仕様は generated/docs/flowchart-kobo.md の §3 にあります。</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  // ラベル → 見た目(class)・幅(マス)・日本語の添え字
+  const DEF = {
+    Start: ['k-term', 2, 'はじめ'], End: ['k-term', 2, 'おわり'],
+    IF: ['k-if', 2, 'もし'], Yes: ['k-yn', 2, 'はい'], No: ['k-yn', 2, 'いいえ'],
+    LOOP: ['k-loop', 2, 'くり返し'], CONTINUE: ['k-loopend', 3, 'もどる'], BREAK: ['k-loopend', 2, 'ぬける'],
+    PRINT: ['k-print', 2, '出力'], INPUT: ['k-chip k-input', 2, '入力'],
+    '=': ['k-chip k-op', 2, '入れる'], '==': ['k-chip k-op k-op2', 2, '等しい'],
+  };
+  const VARS = ['a', 'b', 'c'];
+  const OPS = ['=', '==', '<', '>', '+', '−', '×', '÷', '%'];
+  const WORDS = { '円': 1, '分': 1, '秒': 1, 'A': 1, 'B': 1, 'C': 1, 'ごうかく': 2, 'ふごうかく': 3 };
+  const CW = 34, RH = 60, CH = 50;
+
+  function info(label) {
+    if (DEF[label]) return { cls: DEF[label][0], w: DEF[label][1], sub: DEF[label][2] };
+    if (VARS.includes(label)) return { cls: 'k-chip k-var', w: 1 };
+    if (OPS.includes(label)) return { cls: 'k-chip k-op', w: 1 };
+    if (/^\d+$/.test(label)) return { cls: 'k-chip k-num', w: label.length <= 2 ? 1 : 2 };
+    if (WORDS[label]) return { cls: 'k-word', w: WORDS[label] };
+    throw new Error('未知のカード: ' + label);
+  }
+  function card(label, pos) {
+    const d = info(label);
+    const el = document.createElement('div');
+    el.className = 'card ' + d.cls;
+    el.style.width = (d.w * CW - 4) + 'px';
+    if (pos) { el.style.left = (pos.col * CW + 2) + 'px'; el.style.top = (pos.row * RH + (RH - CH) / 2) + 'px'; }
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', d.sub ? `${label}(${d.sub})` : label);
+    const m = document.createElement('span');
+    m.className = 'm';
+    m.textContent = label;
+    if (label.length >= 8) m.dataset.long = '';
+    el.appendChild(m);
+    if (d.sub) {
+      const s = document.createElement('span');
+      s.className = 's';
+      s.textContent = d.sub;
+      s.setAttribute('aria-hidden', 'true');
+      el.appendChild(s);
+    }
+    return { el, w: d.w };
+  }
+
+  const GROUPS = [
+    { name: '条件分岐の仲間', color: 'var(--mura)', cards: ['IF', 'Yes', 'No'],
+      note: 'IF は流れ図の判断記号に寄せた形。Yes / No は同じ紫の淡い地と枠にして、IF のすぐ下に置く目印だと分かるようにする。' },
+    { name: 'ループの仲間', color: 'var(--shu)', cards: ['LOOP', 'CONTINUE', 'BREAK'],
+      note: 'LOOP はループの始まりの記号(上の角を落とす)。CONTINUE と BREAK はループの終わりの記号(下の角を落とす)。' },
+    { name: '出力の仲間', color: 'var(--ai)', cards: ['PRINT', '円', '分', '秒', 'ふごうかく'],
+      note: 'PRINT は流れ図の表示記号に寄せた平行四辺形。ことばのカードは同じ藍の淡い地と枠で、PRINT の後ろに並べる部品だと分かるようにする。' },
+    { name: 'はじまりとおわり', color: 'var(--sumi)', cards: ['Start', 'End'],
+      note: '流れ図の端子記号(両端が丸い形)。仲間の色と紛れないよう、色を付けない墨色にする。' },
+    { name: '変数の仲間', color: 'var(--var)', cards: ['a', 'b', 'c'],
+      note: '値を入れておく箱。緑の淡い地と枠。文字は斜体。' },
+    { name: '数値の仲間', color: 'var(--num)', cards: ['INPUT', '1', '60', '100', '1000'],
+      note: '数字と INPUT(テストケースで与えられる数)。茶の淡い地と枠。文字は等幅。数字は 2 けたまで 1 マス、3 けた以上は 2 マス。' },
+    { name: '記号の仲間', color: 'var(--sym)', cards: ['=', '==', '<', '>', '+', '−', '×', '÷', '%'],
+      note: '代入・比較・計算の記号。灰青の淡い地と枠。取り違えやすい = と == には意味の添え字を付け、2 マスにする。' },
+  ];
+  const groups = document.getElementById('groups');
+  for (const g of GROUPS) {
+    const box = document.createElement('section');
+    box.className = 'group';
+    box.innerHTML = `<h3><span class="swatch" style="background:${g.color}"></span>${g.name}</h3>`;
+    const row = document.createElement('div');
+    row.className = 'row';
+    for (const l of g.cards) row.appendChild(card(l).el);
+    box.appendChild(row);
+    const p = document.createElement('p');
+    p.textContent = g.note;
+    box.appendChild(p);
+    groups.appendChild(box);
+  }
+
+  // 盤面: 1 行 = 「開始列:カード カード …」を | で区切る
+  const BOARDS = [
+    { title: '課題 8 カウントダウン(ループと条件分岐)', note: 'a を表示しては 1 減らし、a が 1 になったら BREAK で抜ける。', cols: 13,
+      rows: ['3:Start', '0:a = INPUT', '0:LOOP', '0:PRINT a', '0:IF a == 1', '0:Yes BREAK | 5:No a = a − 1', '5:CONTINUE', '3:End'] },
+    { title: '課題 7 3 段階の評価(入れ子の条件分岐)', note: '50 より小さければ C。そうでなければ 80 より小さいかを調べて B か A。', cols: 12,
+      rows: ['4:Start', '0:IF INPUT < 50', '0:Yes | 4:No', '0:PRINT C | 4:IF INPUT < 80', '4:Yes | 8:No', '4:PRINT B | 8:PRINT A', '4:End'] },
+    { title: '課題 5 分と秒(ことばをつなげる)', note: '「1分15秒」のように、変数とことばを PRINT の後ろに並べて 1 行にする。', cols: 12,
+      rows: ['3:Start', '0:a = INPUT ÷ 60', '0:b = INPUT % 60', '0:PRINT a 分 b 秒', '3:End'] },
+  ];
+  const boards = document.getElementById('boards');
+  for (const b of BOARDS) {
+    const box = document.createElement('section');
+    box.className = 'board-box';
+    box.innerHTML = `<h3>${b.title}</h3><p>${b.note}</p>`;
+    const scroll = document.createElement('div');
+    scroll.className = 'board-scroll';
+    const board = document.createElement('div');
+    board.className = 'board';
+    board.style.width = (b.cols * CW) + 'px';
+    board.style.height = (b.rows.length * RH) + 'px';
+    board.setAttribute('role', 'img');
+    board.setAttribute('aria-label', b.title + 'の盤面');
+    b.rows.forEach((line, row) => {
+      for (const seg of line.split('|')) {
+        const m = seg.trim().match(/^(\d+):(.*)$/);
+        let col = Number(m[1]);
+        for (const label of m[2].trim().split(/\s+/)) {
+          const c = card(label, { col, row });
+          board.appendChild(c.el);
+          col += c.w;
+        }
+      }
+    });
+    scroll.appendChild(board);
+    box.appendChild(scroll);
+    boards.appendChild(box);
+  }
+
+  // テーマ切り替え(見本の確認用。保存はしない)
+  const btns = document.querySelectorAll('[data-theme-set]');
+  const current = () => document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const sync = () => btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeSet === current())));
+  btns.forEach((b) => b.addEventListener('click', () => { document.documentElement.dataset.theme = b.dataset.themeSet; sync(); }));
+  sync();
+})();
+</script>
+</body>
+</html>
