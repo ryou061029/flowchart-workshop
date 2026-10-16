@@ -596,29 +596,37 @@
     for (const b of boards) { h = consume(h, b); if (!h) return false; }
     return true;
   }
-  // plans: 仕掛けを満たす解き方(課題の順に [課題, 正解例・別解の番号])。手札 = 解き方ごとの必要枚数の最大 + 余裕
+  // twist: 足りないカードとその枚数(正解例のままでは足りず、§5.3 の別解を 1 つ使えば足りる枚数)
+  // slack: 余裕 = 代入 1 行ぶん(変数 a・=・演算子 1 枚)
   const SET_DEFS = [
     { id: 'A', title: '計算の組み立て', tasks: ['t1', 't3', 't5'],
       twist: { card: 'input', count: 3, text: 'INPUT が 3 枚しかない。課題 5 では INPUT の値をいったん変数に入れる必要がある' },
-      plans: [[['t1', 0], ['t3', 0], ['t5', 2]]], slack: { set: 1, 'var:a': 1, add: 1 } },
+      slack: { set: 1, 'var:a': 1, add: 1 } },
     { id: 'B', title: '分かれ道', tasks: ['t2', 't6', 't7'],
       twist: { card: 'input', count: 4, text: 'INPUT が 4 枚しかない。課題 6 では INPUT の値をいったん変数に入れる必要がある' },
-      plans: [[['t2', 0], ['t6', 1], ['t7', 0]]], slack: { set: 1, 'var:a': 1, sub: 1 } },
+      slack: { set: 1, 'var:a': 1, sub: 1 } },
     { id: 'C', title: 'くり返し', tasks: ['t8', 't9', 't10'],
       twist: { card: 'num:1', count: 3, text: '数字の 1 が 3 枚しかない。どこかで 1 を使わない書き方が必要になる' },
-      plans: [[['t8', 0], ['t9', 1], ['t10', 0]], [['t8', 1], ['t9', 0], ['t10', 0]]], slack: { set: 1, 'var:a': 1, add: 1 } },
+      slack: { set: 1, 'var:a': 1, add: 1 } },
   ];
-  const planBoards = (plan) => plan.map(([id, i]) => fromText(taskById(id).examples[i].rows));
+  // 正解例・別解の組み合わせ(課題の順に例の番号)をすべて列挙して盤面にする
+  const comboBoards = (tasks) => tasks
+    .reduce((acc, id) => acc.flatMap((c) => taskById(id).examples.map((_, i) => [...c, i])), [[]])
+    .map((c) => tasks.map((id, k) => fromText(taskById(id).examples[c[k]].rows)));
   const SETS = SET_DEFS.map((d) => {
+    // 手札 = 仕掛けのカードが枚数に収まる組み合わせすべてについて、カードごとの必要枚数の最大 + 余裕(仕様 §6.2)
+    const keeps = comboBoards(d.tasks)
+      .filter((boards) => boards.reduce((n, b) => n + (usage(b)[d.twist.card] || 0), 0) <= d.twist.count);
     const hand = {};
-    for (const plan of d.plans) {
+    for (const boards of keeps) {
       const need = {};
-      for (const b of planBoards(plan)) for (const [k, n] of Object.entries(usage(b))) need[k] = (need[k] || 0) + n;
+      for (const b of boards) for (const [k, n] of Object.entries(usage(b))) need[k] = (need[k] || 0) + n;
       for (const [k, n] of Object.entries(need)) hand[k] = Math.max(hand[k] || 0, n);
     }
     for (const [k, n] of Object.entries(d.slack)) hand[k] = (hand[k] || 0) + n;
     const total = Object.values(hand).reduce((a, b) => a + b, 0);
-    const least = Math.min(...d.plans.map((plan) => planBoards(plan).reduce((n, b) => n + b.length, 0)));
+    // ★2 の基準 = 手札に収まる組み合わせのうち最少の枚数で 3 問を解いたときに残る枚数
+    const least = Math.min(...keeps.map((boards) => boards.reduce((n, b) => n + b.length, 0)));
     return Object.assign({}, d, {
       hand, parLeft: total - least,
       parSec: d.tasks.reduce((n, id) => n + taskById(id).parSec, 0),

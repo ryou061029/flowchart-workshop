@@ -301,26 +301,45 @@ test('チャレンジは 3 セットで、課題の並びと基準時間は §6.
   }
 });
 
-test('AC-7: 仕掛けを満たす解き方は手札に収まり、正解例をそのまま並べると収まらない', () => {
+// 正解例・別解の組み合わせ(課題の順に例の番号)をすべて列挙し、その盤面と仕掛けのカードの使用枚数を数える
+const combosOf = (s) => s.tasks.reduce((acc, id) => acc.flatMap((c) => task(id).examples.map((_, i) => [...c, i])), [[]]);
+const boardsOf = (s, c) => s.tasks.map((id, k) => board(task(id).examples[c[k]].rows));
+const twistUse = (s, boards) => boards.reduce((n, b) => n + b.filter((x) => x.card === s.twist.card).length, 0);
+const cardsOf = (boards) => boards.reduce((n, b) => n + b.length, 0);
+
+test('AC-7: 仕掛けのカードの枚数は、正解例のままでは足りず、別解を 1 つ使えば足りる枚数', () => {
   const SPEC_TWIST = { A: ['input', 3], B: ['input', 4], C: ['num:1', 3] };
   for (const s of E.SETS) {
-    assert.deepEqual([s.twist.card, s.hand[s.twist.card]], SPEC_TWIST[s.id], `${s.id} の足りないカード`);
-    assert.ok(s.plans.length >= 1);
-    for (const plan of s.plans) {
-      assert.deepEqual(plan.map(([id]) => id), s.tasks, `${s.id} の解き方は課題の順`);
-      const boards = plan.map(([id, i]) => board(task(id).examples[i].rows));
-      assert.ok(E.fitsHand(s.hand, boards), `${s.id} の解き方 ${JSON.stringify(plan)} が収まらない`);
-    }
-    const models = s.tasks.map((id) => board(task(id).examples[0].rows));
-    assert.equal(E.fitsHand(s.hand, models), false, `${s.id} は正解例のままでも収まってしまう`);
+    assert.deepEqual([s.twist.card, s.twist.count], SPEC_TWIST[s.id], `${s.id} の足りないカード`);
+    assert.equal(s.hand[s.twist.card], s.twist.count, `${s.id} の手札にある仕掛けのカード`);
+    const models = s.tasks.map(() => 0);
+    assert.ok(twistUse(s, boardsOf(s, models)) > s.twist.count, `${s.id} は正解例のままで足りてしまう`);
+    let one = Infinity;
+    s.tasks.forEach((id, k) => {
+      for (let i = 1; i < task(id).examples.length; i++) { const c = models.slice(); c[k] = i; one = Math.min(one, twistUse(s, boardsOf(s, c))); }
+    });
+    assert.equal(s.twist.count, one, `${s.id} は別解を 1 つ使えば足りる枚数`);
   }
 });
 
-test('AC-7: 手札の基準(残り枚数)は、最少の解き方で残る枚数', () => {
+test('AC-7: 仕掛けを守る組み合わせはすべて手札に収まり、破る組み合わせは 1 つも収まらない', () => {
+  const SPEC_FITS = { A: 4, B: 2, C: 6 };
   for (const s of E.SETS) {
-    const least = Math.min(...s.plans.map((plan) => plan.reduce((n, [id, i]) => n + board(task(id).examples[i].rows).length, 0)));
+    const fits = combosOf(s).filter((c) => E.fitsHand(s.hand, boardsOf(s, c)));
+    const keeps = combosOf(s).filter((c) => twistUse(s, boardsOf(s, c)) <= s.twist.count);
+    assert.deepEqual(fits, keeps, `${s.id}: 収まる組み合わせ = 仕掛けを守る組み合わせ`);
+    assert.equal(fits.length, SPEC_FITS[s.id], `${s.id} の収まる組み合わせの数`);
+    assert.equal(E.fitsHand(s.hand, boardsOf(s, s.tasks.map(() => 0))), false, `${s.id} は正解例のままでも収まってしまう`);
+  }
+});
+
+test('AC-7: 手札の基準(残り枚数)は、手札に収まる組み合わせのうち最少の枚数で解いたときに残る枚数', () => {
+  const SLACK = 3; // 余裕: 代入 1 行ぶん(変数 a・=・演算子 1 枚)
+  for (const s of E.SETS) {
+    const least = Math.min(...combosOf(s).filter((c) => E.fitsHand(s.hand, boardsOf(s, c))).map((c) => cardsOf(boardsOf(s, c))));
     assert.equal(s.parLeft, handTotal(s.hand) - least, s.id);
-    assert.ok(s.parLeft > 0, `${s.id} には余裕のカードがある`);
+    assert.equal(handTotal(s.slack), SLACK, `${s.id} の余裕`);
+    assert.ok(s.parLeft >= SLACK, `${s.id} には余裕のカードがある`);
   }
 });
 
