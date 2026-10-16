@@ -426,10 +426,9 @@
       ],
     },
   ];
-  const min = (m) => m * 60;
   const TASKS = [
     {
-      id: 't1', level: '入門', no: 1, title: 'おつり', nums: [10, 100, 1000], words: ['円'], parSec: min(2),
+      id: 't1', level: '入門', no: 1, title: 'おつり', nums: [10, 100, 1000], words: ['円'],
       goal: '1000 円を出して、INPUT の金額の買い物をしたときのおつりを「◯円」と出力する。',
       hint: 'おつりは「出したお金 − 買い物の金額」です。引く順番に気をつけましょう。',
       cases: cases([[300, ['700円']], [999, ['1円']], [1000, ['0円']], [1, ['999円']]]),
@@ -441,7 +440,7 @@
       ],
     },
     {
-      id: 't2', level: '入門', no: 2, title: '税込み価格', nums: [1, 10, 11, 100], words: ['円'], parSec: min(3),
+      id: 't2', level: '入門', no: 2, title: '税込み価格', nums: [1, 10, 11, 100], words: ['円'],
       goal: 'INPUT(税抜きの値段)に 10% の消費税を足した金額を、1 円未満を切り捨てて「◯円」と出力する。',
       hint: '10% を足すことは 1.1 倍することと同じです。小数のカードはないので、11 倍してから 10 で割ると…?',
       cases: cases([[100, ['110円']], [98, ['107円']], [1000, ['1100円']], [5, ['5円']], [0, ['0円']]]),
@@ -453,7 +452,7 @@
       ],
     },
     {
-      id: 't3', level: '入門', no: 3, title: '十の位', nums: [1, 10, 100], words: [], parSec: min(3),
+      id: 't3', level: '入門', no: 3, title: '十の位', nums: [1, 10, 100], words: [],
       goal: 'INPUT の十の位の数字を出力する。',
       hint: '÷ 10 で一の位を切り捨てると、十の位が一番下に来ます。そこから一の位だけを取り出すには…?',
       cases: cases([[7, ['0']], [25, ['2']], [90, ['9']], [130, ['3']], [2026, ['2']]]),
@@ -465,7 +464,7 @@
       ],
     },
     {
-      id: 't4', level: '初級', no: 4, title: '2 けたの数字の和', nums: [1, 10, 100], words: [], parSec: min(4),
+      id: 't4', level: '初級', no: 4, title: '2 けたの数字の和', nums: [1, 10, 100], words: [],
       goal: '2 けたの INPUT について、十の位と一の位の数字を足した数を出力する。',
       hint: '十の位は ÷ 10、一の位は % 10 で取り出せます。',
       cases: cases([[10, ['1']], [23, ['5']], [47, ['11']], [50, ['5']], [99, ['18']]]),
@@ -477,7 +476,7 @@
       ],
     },
     {
-      id: 't5', level: '初級', no: 5, title: '分と秒', nums: [1, 60, 100], words: ['分', '秒'], parSec: min(5),
+      id: 't5', level: '初級', no: 5, title: '分と秒', nums: [1, 60, 100], words: ['分', '秒'],
       goal: 'INPUT(秒数)を「◯分◯秒」の形で出力する。',
       hint: '1 分は 60 秒。分は ÷、残りの秒は % で求められます。PRINT の後ろには変数とことばを交互に並べられます。',
       cases: cases([[75, ['1分15秒']], [60, ['1分0秒']], [59, ['0分59秒']], [0, ['0分0秒']], [3600, ['60分0秒']]]),
@@ -491,7 +490,7 @@
       ],
     },
     {
-      id: 't6', level: '中級', no: 6, title: '絶対値', nums: [0, 1], words: [], parSec: min(5),
+      id: 't6', level: '中級', no: 6, title: '絶対値', nums: [0, 1], words: [],
       goal: 'INPUT がマイナスならマイナスを取った数を、そうでなければそのままの数を出力する。',
       hint: 'マイナスの数は 0 より小さい数です。0 からその数を引くと、マイナスが取れます。',
       cases: cases([[-5, ['5']], [5, ['5']], [0, ['0']], [-120, ['120']], [7, ['7']]]),
@@ -503,7 +502,7 @@
       ],
     },
     {
-      id: 't7', level: '中級', no: 7, title: '3 段階の評価', nums: [49, 50, 79, 80, 100], words: ['A', 'B', 'C'], parSec: min(6),
+      id: 't7', level: '中級', no: 7, title: '3 段階の評価', nums: [49, 50, 79, 80, 100], words: ['A', 'B', 'C'],
       goal: 'INPUT(点数)が 80 以上なら「A」、50 以上 80 未満なら「B」、50 未満なら「C」と出力する。',
       hint: 'まず 50 より小さいかを調べ、そうでなければ No の側でもう一度調べます。「80 以上」は「79 より大きい」とも言えます。',
       cases: cases([[0, ['C']], [49, ['C']], [50, ['B']], [79, ['B']], [80, ['A']], [100, ['A']]]),
@@ -515,7 +514,7 @@
       ],
     },
     {
-      id: 't8', level: '上級', no: 8, title: 'カウントダウン', nums: [0, 1, 2], words: [], parSec: min(7),
+      id: 't8', level: '上級', no: 8, title: 'カウントダウン', nums: [0, 1, 2], words: [],
       goal: 'INPUT(1 以上)から 1 まで、1 ずつ減らしながら 1 行に 1 つずつ出力する。',
       hint: 'LOOP の中で PRINT してから 1 減らし、CONTINUE で戻ります。1 を出力したら BREAK で抜けます。',
       cases: cases([[3, ['3', '2', '1']], [1, ['1']], [5, ['5', '4', '3', '2', '1']]]),
@@ -527,7 +526,7 @@
       ],
     },
     {
-      id: 't9', level: '上級', no: 9, title: '2 倍、2 倍', nums: [1, 2], words: [], parSec: min(7),
+      id: 't9', level: '上級', no: 9, title: '2 倍、2 倍', nums: [1, 2], words: [],
       goal: '1 から始めて 2 倍し続け、INPUT(1 以上)を初めて超えた数を出力する。',
       hint: '変数に 1 を入れておき、LOOP の中で 2 倍します。INPUT より大きくなったら BREAK で抜けて PRINT します。',
       cases: cases([[1, ['2']], [5, ['8']], [8, ['16']], [100, ['128']], [1000, ['1024']]]),
@@ -539,7 +538,7 @@
       ],
     },
     {
-      id: 't10', level: '上級', no: 10, title: 'けた数', nums: [0, 1, 10], words: [], parSec: min(8),
+      id: 't10', level: '上級', no: 10, title: 'けた数', nums: [0, 1, 10], words: [],
       goal: 'INPUT(1 以上)が何けたの数かを出力する。',
       hint: '10 で割るたびに 1 けたずつ減っていきます。割った回数を別の変数で数え、0 になったら抜けます。',
       cases: cases([[7, ['1']], [10, ['2']], [999, ['3']], [1000, ['4']], [20261005, ['8']]]),
@@ -554,6 +553,11 @@
   // 基準枚数 = 正解例と別解のうち最少の枚数(練習には基準を設けない)
   for (const t of PRACTICE) { t.par = null; t.parSec = null; }
   for (const t of TASKS) t.par = Math.min(...t.examples.map((x) => fromText(x.rows).length));
+  // 基準時間 = 置く時間(基準枚数 × 10 秒)+ 考える時間(段階ごと)を 30 秒単位に切り上げ(仕様 §5.1)。
+  // 係数は机上の目安。試遊の記録で見直すときは、この 2 つだけを変える
+  const PLACE_SEC = 10;
+  const THINK_SEC = { '入門': 60, '初級': 120, '中級': 180, '上級': 240 };
+  for (const t of TASKS) t.parSec = Math.ceil((t.par * PLACE_SEC + THINK_SEC[t.level]) / 30) * 30;
   const ALL = [...PRACTICE, ...TASKS];
   const taskById = (id) => ALL.find((t) => t.id === id) || null;
 
@@ -592,29 +596,37 @@
     for (const b of boards) { h = consume(h, b); if (!h) return false; }
     return true;
   }
-  // plans: 仕掛けを満たす解き方(課題の順に [課題, 正解例・別解の番号])。手札 = 解き方ごとの必要枚数の最大 + 余裕
+  // twist: 足りないカードとその枚数(正解例のままでは足りず、§5.3 の別解を 1 つ使えば足りる枚数)
+  // slack: 余裕 = 代入 1 行ぶん(変数 a・=・演算子 1 枚)
   const SET_DEFS = [
     { id: 'A', title: '計算の組み立て', tasks: ['t1', 't3', 't5'],
       twist: { card: 'input', count: 3, text: 'INPUT が 3 枚しかない。課題 5 では INPUT の値をいったん変数に入れる必要がある' },
-      plans: [[['t1', 0], ['t3', 0], ['t5', 2]]], slack: { set: 1, 'var:a': 1, add: 1 } },
+      slack: { set: 1, 'var:a': 1, add: 1 } },
     { id: 'B', title: '分かれ道', tasks: ['t2', 't6', 't7'],
       twist: { card: 'input', count: 4, text: 'INPUT が 4 枚しかない。課題 6 では INPUT の値をいったん変数に入れる必要がある' },
-      plans: [[['t2', 0], ['t6', 1], ['t7', 0]]], slack: { set: 1, 'var:a': 1, sub: 1 } },
+      slack: { set: 1, 'var:a': 1, sub: 1 } },
     { id: 'C', title: 'くり返し', tasks: ['t8', 't9', 't10'],
       twist: { card: 'num:1', count: 3, text: '数字の 1 が 3 枚しかない。どこかで 1 を使わない書き方が必要になる' },
-      plans: [[['t8', 0], ['t9', 1], ['t10', 0]], [['t8', 1], ['t9', 0], ['t10', 0]]], slack: { set: 1, 'var:a': 1, add: 1 } },
+      slack: { set: 1, 'var:a': 1, add: 1 } },
   ];
-  const planBoards = (plan) => plan.map(([id, i]) => fromText(taskById(id).examples[i].rows));
+  // 正解例・別解の組み合わせ(課題の順に例の番号)をすべて列挙して盤面にする
+  const comboBoards = (tasks) => tasks
+    .reduce((acc, id) => acc.flatMap((c) => taskById(id).examples.map((_, i) => [...c, i])), [[]])
+    .map((c) => tasks.map((id, k) => fromText(taskById(id).examples[c[k]].rows)));
   const SETS = SET_DEFS.map((d) => {
+    // 手札 = 仕掛けのカードが枚数に収まる組み合わせすべてについて、カードごとの必要枚数の最大 + 余裕(仕様 §6.2)
+    const keeps = comboBoards(d.tasks)
+      .filter((boards) => boards.reduce((n, b) => n + (usage(b)[d.twist.card] || 0), 0) <= d.twist.count);
     const hand = {};
-    for (const plan of d.plans) {
+    for (const boards of keeps) {
       const need = {};
-      for (const b of planBoards(plan)) for (const [k, n] of Object.entries(usage(b))) need[k] = (need[k] || 0) + n;
+      for (const b of boards) for (const [k, n] of Object.entries(usage(b))) need[k] = (need[k] || 0) + n;
       for (const [k, n] of Object.entries(need)) hand[k] = Math.max(hand[k] || 0, n);
     }
     for (const [k, n] of Object.entries(d.slack)) hand[k] = (hand[k] || 0) + n;
     const total = Object.values(hand).reduce((a, b) => a + b, 0);
-    const least = Math.min(...d.plans.map((plan) => planBoards(plan).reduce((n, b) => n + b.length, 0)));
+    // ★2 の基準 = 手札に収まる組み合わせのうち最少の枚数で 3 問を解いたときに残る枚数
+    const least = Math.min(...keeps.map((boards) => boards.reduce((n, b) => n + b.length, 0)));
     return Object.assign({}, d, {
       hand, parLeft: total - least,
       parSec: d.tasks.reduce((n, id) => n + taskById(id).parSec, 0),
