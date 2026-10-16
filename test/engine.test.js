@@ -30,10 +30,21 @@ const out = (lines, input) => {
 test('課題は練習 2 問・本編 10 問で、基準枚数と基準時間は仕様 §5.1 どおり', () => {
   assert.deepEqual(E.PRACTICE.map((t) => t.id), ['p1', 'p2']);
   assert.deepEqual(E.TASKS.map((t) => [t.id, t.par, t.parSec]), [
-    ['t1', 10, 120], ['t2', 12, 180], ['t3', 11, 180], ['t4', 13, 240], ['t5', 17, 300],
-    ['t6', 17, 300], ['t7', 20, 360], ['t8', 21, 420], ['t9', 21, 420], ['t10', 29, 480],
+    ['t1', 10, 180], ['t2', 12, 180], ['t3', 11, 180], ['t4', 13, 270], ['t5', 17, 300],
+    ['t6', 17, 360], ['t7', 20, 390], ['t8', 21, 450], ['t9', 21, 450], ['t10', 29, 540],
   ]);
   for (const t of E.PRACTICE) assert.equal(t.par, null, '練習には基準がない');
+});
+
+// 基準時間 = 置く時間(基準枚数 × 10 秒)+ 考える時間(段階ごと)を 30 秒単位に切り上げ(AC-19)
+test('AC-19: 各課題の基準時間は §5.1 の式どおりで、チャレンジの基準時間はその合計', () => {
+  const THINK = { '入門': 60, '初級': 120, '中級': 180, '上級': 240 };
+  for (const t of E.TASKS) {
+    assert.ok(t.level in THINK, `${t.id} の段階 ${t.level}`);
+    assert.equal(t.parSec, Math.ceil((t.par * 10 + THINK[t.level]) / 30) * 30, `${t.id} ${t.title}`);
+    assert.equal(t.parSec % 30, 0, `${t.id} は 30 秒単位`);
+  }
+  for (const s of E.SETS) assert.equal(s.parSec, s.tasks.reduce((n, id) => n + task(id).parSec, 0), s.id);
 });
 
 test('テストケースは仕様 §5.2 どおり', () => {
