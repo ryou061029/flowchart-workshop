@@ -1,0 +1,166 @@
+:root{
+  --bg:#F0F2EF; --surface:#FBFCFA; --surface-2:#E7EAE5;
+  --ink:#16201C; --ink-2:#3A4842; --muted:#66756D;
+  --line:#D2D9D1; --line-2:#BFC8BF;
+  --accent:#0E6047; --accent-soft:#DDEDE4;
+  --warn:#8A5A00; --warn-soft:#FBEFD6;
+  --danger:#9B2C2C; --danger-soft:#FBE3E3;
+  --th-bg:#0E6047; --th-ink:#FBFCFA;
+  --zebra:#F4F6F3;
+  /* グラフ: 系列は 1 から順に使う / 前と比べて良くなった・悪くなった */
+  --series-1:#1F8A64; --series-2:#C98A1B; --series-3:#4C6FB0; --series-4:#B5573A;
+  --better:#4C6FB0; --worse:#C0453A;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1512; --surface:#151E1A; --surface-2:#1B2620;
+    --ink:#E6EDE8; --ink-2:#BCC9C2; --muted:#8DA096;
+    --line:#28352E; --line-2:#37483F;
+    --accent:#6CC79E; --accent-soft:#173129;
+    --warn:#E3B872; --warn-soft:#2E2517;
+    --danger:#E89A9A; --danger-soft:#2E1A1A;
+    --th-bg:#22302A; --th-ink:#E6EDE8;
+    --zebra:#131C18;
+    --series-1:#1F9268; --series-2:#B9821C; --series-3:#5277CB; --series-4:#C25A3A;
+    --better:#5277CB; --worse:#D0604F;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1512; --surface:#151E1A; --surface-2:#1B2620;
+  --ink:#E6EDE8; --ink-2:#BCC9C2; --muted:#8DA096;
+  --line:#28352E; --line-2:#37483F;
+  --accent:#6CC79E; --accent-soft:#173129;
+  --warn:#E3B872; --warn-soft:#2E2517;
+  --danger:#E89A9A; --danger-soft:#2E1A1A;
+  --th-bg:#22302A; --th-ink:#E6EDE8;
+  --zebra:#131C18;
+  --series-1:#1F9268; --series-2:#B9821C; --series-3:#5277CB; --series-4:#C25A3A;
+  --better:#5277CB; --worse:#D0604F;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0; padding:0; background:var(--bg); color:var(--ink);
+  font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+}
+.wrap,main{max-width:1000px; margin:0 auto; padding:32px 20px 80px}
+
+/* ---- 共通ヘッダ(document-header.md) ---- */
+.doc-header{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:10px; padding:20px 22px; margin-bottom:28px;
+}
+.doc-header h1{margin:0 0 14px; font-size:24px; line-height:1.35}
+.doc-header dl{display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; margin:0; font-size:13px}
+.doc-header dt{color:var(--muted)}
+.doc-header dd{margin:0; color:var(--ink-2)}
+.badge{display:inline-block; padding:1px 8px; border-radius:999px; font-size:12px; font-weight:600}
+.badge-confidential{background:var(--danger-soft); color:var(--danger)}
+.badge-internal{background:var(--warn-soft); color:var(--warn)}
+.badge-public{background:var(--accent-soft); color:var(--accent)}
+
+/* ---- 目次: インライン形態 ---- */
+nav.toc{
+  background:var(--surface-2); border:1px solid var(--line);
+  border-radius:10px; padding:14px 20px; margin-bottom:32px; font-size:14px;
+}
+nav.toc .toc-title{margin:0 0 8px; font-weight:700; font-size:13px; color:var(--muted)}
+nav.toc ul,nav.toc ol{margin:0; padding-left:20px}
+nav.toc a{color:var(--ink-2); text-decoration:none}
+nav.toc a:hover{color:var(--accent); text-decoration:underline}
+
+/* ---- 目次: サイドバー形態(.has-toc。通常は body、Artifact では本文を包む div に付ける) ---- */
+.has-toc{padding-left:296px}
+.has-toc nav.toc{
+  position:fixed; top:0; left:0; width:252px; height:100vh; overflow-y:auto;
+  margin:0; border:0; border-right:1px solid var(--line); border-radius:0;
+  padding:20px 12px 48px; font-size:12.5px;
+}
+.has-toc nav.toc ul{list-style:none; margin:0; padding:0}
+.has-toc nav.toc li{margin:1px 0}
+.has-toc nav.toc a{display:block; padding:3px 6px; border-radius:3px; line-height:1.45}
+.has-toc nav.toc a:hover{background:var(--surface); text-decoration:none}
+.has-toc nav.toc a.lv3{padding-left:20px; font-size:12px; color:var(--muted)}
+.has-toc nav.toc a.current{background:var(--accent-soft); color:var(--accent); font-weight:600}
+@media (max-width:999px){
+  .has-toc{padding-left:0}
+  .has-toc nav.toc{
+    position:static; width:auto; height:auto;
+    border-right:0; border-bottom:1px solid var(--line); margin:0 0 18px;
+    padding:14px 20px;
+  }
+}
+
+/* ---- 本文 ---- */
+h1{font-size:24px; line-height:1.35; margin:0 0 20px}
+h2{margin:40px 0 12px; font-size:19px; padding-bottom:8px; border-bottom:2px solid var(--line-2)}
+h3{margin:28px 0 8px; font-size:16px}
+h4{margin:18px 0 6px; font-size:14.5px}
+p,li{color:var(--ink-2)}
+a{color:var(--accent)}
+hr{border:0; border-top:1px solid var(--line); margin:24px 0}
+code{background:var(--surface-2); padding:1px 5px; border-radius:4px; font-size:.9em}
+pre{background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:14px; overflow-x:auto}
+pre code{background:none; padding:0}
+blockquote{margin:16px 0; padding:2px 16px; border-left:3px solid var(--accent); color:var(--muted)}
+.note{background:var(--accent-soft); border-radius:8px; padding:12px 16px; margin:16px 0; font-size:14px}
+
+/* ---- 表 ---- */
+.table-wrap{overflow-x:auto; margin:16px 0; border:1px solid var(--line); border-radius:8px}
+table{border-collapse:collapse; width:100%; font-size:13px; background:var(--surface)}
+th,td{border-bottom:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top; overflow-wrap:anywhere}
+th{background:var(--th-bg); color:var(--th-ink); font-weight:700; white-space:nowrap}
+tbody tr:nth-child(even){background:var(--zebra)}
+tr:last-child td{border-bottom:none}
+td.a-right,th.a-right{text-align:right; white-space:nowrap; overflow-wrap:normal}
+td.a-center,th.a-center{text-align:center}
+.nb{white-space:nowrap}
+
+/* ---- 図(Mermaid 等) ---- */
+img{max-width:100%; height:auto}
+.img-missing{color:var(--danger); font-size:.9em}
+figure{margin:16px 0}
+figure.mermaid{overflow-x:auto; text-align:center}
+figure.mermaid svg{max-width:100%; height:auto}
+figure.mermaid-src pre{margin:0}
+figcaption{color:var(--muted); font-size:12px; margin-top:4px; text-align:center}
+
+/* ---- グラフ(SVG を HTML に直接書く。系列色は --series-*。見本は「使い方」のグラフの型) ---- */
+figure.chart{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:16px 18px 12px; margin:20px 0; overflow-x:auto}
+.chart-head{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:4px 16px; margin:0 0 8px}
+.chart-title{margin:0; font-size:14px; font-weight:700; color:var(--ink)}
+.chart-legend{display:flex; flex-wrap:wrap; gap:4px 14px; margin:0; padding:0; list-style:none; font-size:12px; color:var(--ink-2)}
+.chart-legend li::before{content:""; display:inline-block; width:14px; height:3px; border-radius:2px; margin-right:6px; vertical-align:middle; background:var(--key, var(--series-1))}
+figure.chart svg{display:block}
+figure.chart text{fill:var(--muted); font-size:12px; font-variant-numeric:tabular-nums}
+figure.chart .grid{stroke:var(--line); stroke-width:1}
+figure.chart .baseline{stroke:var(--line-2); stroke-width:1}
+figure.chart .line{fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round}
+figure.chart .area{opacity:.1}
+figure.chart .end{stroke:var(--surface); stroke-width:2}
+figure.chart text.end-label{fill:var(--ink-2); font-weight:600}
+figure.chart figcaption{text-align:left; margin-top:8px}
+
+/* ---- 印刷 ---- */
+@media print{
+  :root{
+    --bg:#fff; --surface:#fff; --surface-2:#f4f4f4; --zebra:#fafafa;
+    --ink:#000; --ink-2:#222; --line:#bbb; --th-bg:#e8e8e8; --th-ink:#000;
+  }
+  body{font-size:11pt; padding:0}
+  .wrap,main{max-width:none; padding:0}
+  nav.toc{display:none}
+  .has-toc{padding-left:0}
+  .has-toc h2{page-break-before:always; break-before:page}
+  .has-toc h2:first-of-type{page-break-before:avoid; break-before:auto}
+  h1,h2,h3,h4{page-break-after:avoid; break-after:avoid}
+  table{font-size:9.5pt}
+  thead{display:table-header-group}
+  tr{page-break-inside:avoid; break-inside:avoid}
+  a{color:inherit; text-decoration:none}
+  .table-wrap{overflow:visible; border:0}
+}
+/* シェルの <style> の中身をそのまま */
